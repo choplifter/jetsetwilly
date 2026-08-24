@@ -2581,7 +2581,10 @@ function physTick(){
     for (let tx=x0; tx<=x1; tx++){
       const t = tileAtPlay(room, tx, ty);
       const top = ty*TILE;
-      if (SOLID(t) || ((t===T.PLAT || t===T.STAIR) && prevBottom <= top + 4)){
+      // Stufen fangen auch seitlich einfliegende Sprünge: Wer fallend die
+      // Spalte betritt und höchstens 10px unter der Kante ist, schnappt drauf.
+      if (SOLID(t) || ((t===T.PLAT || t===T.STAIR) && prevBottom <= top + 4) ||
+          (t === T.STAIR && game.py + PH - top <= 10)){
         game.py = top - PH; game.vy = 0; game.onGround = true;
         break;
       }
