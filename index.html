@@ -206,9 +206,8 @@ const VANISH_TIME = 24;         // Schwundboden: Frames bis endgültig weg
 const T = { EMPTY:0, WALL:1, PLAT:2, SPIKE:3, CONVL:4, CONVR:5, CRUMBLE:6, SOLAR:7,
             CONVML:8, CONVMR:9, VANISH:10, STAIR:11, GATE:12 };
 const SOLID = t => t === T.WALL || t === T.CONVL || t === T.CONVR || t === T.CRUMBLE ||
-                   t === T.CONVML || t === T.CONVMR || t === T.VANISH ||
-                   t === T.STAIR || t === T.GATE;
-const BLOCKS_GUARD = t => SOLID(t) || t === T.PLAT;
+                   t === T.CONVML || t === T.CONVMR || t === T.VANISH || t === T.GATE;
+const BLOCKS_GUARD = t => SOLID(t) || t === T.PLAT || t === T.STAIR;
 
 const BRIGHT = ['#00ffff','#ff00ff','#ffff00','#00ff00','#ff5555','#ffffff'];
 const WALLCOLS = [
@@ -1184,16 +1183,16 @@ const DEFAULT_ROOMS = [
 "#..*...........................#",
 "#.====.........................#",
 "#..............................#",
-"#......====....................#",
-"#..............................#",
-"#..====.....................*..#",
-"#.........................====.#",
-"#......====........====........#",
-"#..............................#",
-"#..====......====..............#",
-"#.........T....................#",
-".........T......................",
-".....S..T.......................",
+"#..T...........................#",
+"#...T..........................#",
+"#....T...........*.............#",
+"#.....T.........====T..........#",
+"#......T............T..........#",
+"#.......T.............T........#",
+"#........T.............T.......#",
+"#.........T.............T......#",
+".........T...............T......",
+".....S..T.................T.....",
 "###########################...##",
 ]},
 { x:2, y:2, name:"Die Eingangshalle", color:0, guards:[10,1], ropes:[[14,0,8]],
@@ -1206,13 +1205,13 @@ const DEFAULT_ROOMS = [
 "#...................====.......#",
 "#..............................#",
 "#..............====............#",
-"#..............................#",
-"#..........====................#",
-"#.......*......................#",
-"#......====....................#",
-"#..............................#",
-"...====...H.....................",
-"................................",
+"#...........T..................#",
+"#..........T...................#",
+"#........*T....................#",
+"#........T.....................#",
+"#.......T......................#",
+"...====T..H.....................",
+"......T.........................",
 "###...##########################",
 ]},
 { x:3, y:2, name:"Die Küche", color:3, guards:[16,0,4],
@@ -1321,12 +1320,12 @@ const DEFAULT_ROOMS = [
 "#..............................#",
 "#...................====.......#",
 "#.....................H........#",
-"#..............====............#",
-"#.....*........................#",
-"#....====.......====...........#",
-"#..............................#",
-"..........====..H..............#",
-"..........^^^^.................#",
+"#..................T...........#",
+"#.....*...........T............#",
+"#....====........T.............#",
+"#...............T..............#",
+"..........====.TH..............#",
+"..........^^^^T................#",
 "################################",
 ]},
 { x:1, y:2, name:"Ballsaal Ost", color:2, guards:[3,3],
@@ -1593,7 +1592,7 @@ function parseAsciiRoom(def){
   return { room, start };
 }
 
-const DEFAULT_REV = 7;   // bei jeder Änderung am Standard-Level erhöhen
+const DEFAULT_REV = 8;   // bei jeder Änderung am Standard-Level erhöhen
 
 function buildDefaultWorld(){
   const w = { start:{rx:2,ry:1,tx:5,ty:14}, rooms:{}, defaultRev:DEFAULT_REV, custom:false };
@@ -1791,6 +1790,23 @@ setInterval(()=>{
 // ================================================================
 // KACHELN & OBJEKTE ZEICHNEN
 // ================================================================
+// Feine Treppe: zwei zierliche 8px-Tritte pro Kachel mit Stützen.
+// ascLeft = Lauf steigt nach links an (gespiegelt)
+function drawFineStair(ctx, px, py, ascLeft, u){
+  u = u || 1;
+  const lo = ascLeft ? 8*u : 0;        // x-Versatz der unteren Trittfläche
+  const hi = ascLeft ? 0 : 8*u;        // x-Versatz der oberen Trittfläche
+  ctx.fillStyle = '#b0b0b0';
+  ctx.fillRect(px + lo, py + 8*u, 8*u, 3*u);   // untere Trittfläche
+  ctx.fillRect(px + hi, py, 8*u, 3*u);         // obere Trittfläche
+  ctx.fillStyle = '#e0e0e0';
+  ctx.fillRect(px + lo, py + 8*u, 8*u, u);     // Trittkanten
+  ctx.fillRect(px + hi, py, 8*u, u);
+  ctx.fillStyle = '#404040';
+  ctx.fillRect(px + lo + (ascLeft ? u : 5*u), py + 11*u, 2*u, 5*u);  // Stützen
+  ctx.fillRect(px + hi + (ascLeft ? u : 5*u), py + 3*u, 2*u, 5*u);
+}
+
 function drawTile(ctx, t, px, py, s, wallCol, frame, crumbleDecay){
   const u = s/16;
   switch(t){
@@ -1911,15 +1927,8 @@ function drawTile(ctx, t, px, py, s, wallCol, frame, crumbleDecay){
       break;
     }
     case T.STAIR: {
-      // Steinstufe: Willy steigt beim Laufen automatisch hinauf
-      ctx.fillStyle = '#b0b0b0';
-      ctx.fillRect(px, py, s, s);
-      ctx.fillStyle = '#e0e0e0';
-      ctx.fillRect(px, py, s, 2*u);
-      ctx.fillStyle = '#404040';
-      ctx.fillRect(px + s - 2*u, py, 2*u, s);
-      ctx.fillRect(px, py + s - 2*u, s, 2*u);
-      ctx.fillRect(px + 4*u, py + 6*u, 8*u, u);
+      // Feine Treppe (Vorschau/Standard: ansteigend nach rechts)
+      drawFineStair(ctx, px, py, false, u);
       break;
     }
     case T.GATE: {
@@ -2458,27 +2467,21 @@ function physTick(){
     if (dx > 0){
       const tx = Math.floor((game.px + PW) / TILE);
       for (let ty=y0; ty<=y1; ty++){
-        const tt = tileAtPlay(room, tx, ty);
-        if (SOLID(tt)){
-          // Treppe: automatisch eine Stufe hinaufsteigen
-          if (tt === T.STAIR && ty === y1 && game.vy >= 0 && canStand(room, game.px, ty*TILE - PH)){
-            game.py = ty*TILE - PH; game.onGround = true;
-            break;
-          }
-          game.px = tx*TILE - PW - 0.01; break;
-        }
+        if (SOLID(tileAtPlay(room, tx, ty))){ game.px = tx*TILE - PW - 0.01; break; }
       }
     } else {
       const tx = Math.floor(game.px / TILE);
       for (let ty=y0; ty<=y1; ty++){
-        const tt = tileAtPlay(room, tx, ty);
-        if (SOLID(tt)){
-          if (tt === T.STAIR && ty === y1 && game.vy >= 0 && canStand(room, game.px, ty*TILE - PH)){
-            game.py = ty*TILE - PH; game.onGround = true;
-            break;
-          }
-          game.px = (tx+1)*TILE + 0.01; break;
-        }
+        if (SOLID(tileAtPlay(room, tx, ty))){ game.px = (tx+1)*TILE + 0.01; break; }
+      }
+    }
+    // Feine Treppe: beim Laufen automatisch die nächste Stufe hinaufsteigen
+    if (game.onGround){
+      const lead = dx > 0 ? Math.floor((game.px + PW) / TILE) : Math.floor(game.px / TILE);
+      const stepRow = Math.floor((game.py + PH) / TILE) - 1;
+      if (stepRow >= 0 && tileAtPlay(room, lead, stepRow) === T.STAIR &&
+          canStand(room, game.px, stepRow*TILE - PH)){
+        game.py = stepRow*TILE - PH;
       }
     }
     if (move !== 0 && game.onGround) game.walkFrame++;
@@ -2509,7 +2512,7 @@ function physTick(){
     for (let tx=x0; tx<=x1; tx++){
       const t = tileAtPlay(room, tx, ty);
       const top = ty*TILE;
-      if (SOLID(t) || (t===T.PLAT && prevBottom <= top + 4)){
+      if (SOLID(t) || ((t===T.PLAT || t===T.STAIR) && prevBottom <= top + 4)){
         game.py = top - PH; game.vy = 0; game.onGround = true;
         break;
       }
@@ -2760,6 +2763,13 @@ function renderRoomTiles(room, isPlay){
         if (decay >= VANISH_TIME) continue;
       }
       if (t === T.GATE && isPlay && game.switched.has(game.rx+","+game.ry)) continue;
+      if (t === T.STAIR){
+        // Steigrichtung aus den diagonalen Nachbarn ableiten
+        const ascLeft = (x>0 && y>0 && room.tiles[(y-1)*COLS + (x-1)] === T.STAIR) ||
+                        (x<COLS-1 && y<ROWS-1 && room.tiles[(y+1)*COLS + (x+1)] === T.STAIR);
+        drawFineStair(ctx, x*TILE, y*TILE, ascLeft, 1);
+        continue;
+      }
       drawTile(ctx, t, x*TILE, y*TILE, TILE, wallCol, frameCount, decay);
     }
   }
