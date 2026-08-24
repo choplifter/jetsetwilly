@@ -2464,15 +2464,19 @@ function physTick(){
   if (dx !== 0){
     const y0 = Math.floor(game.py / TILE);
     const y1 = Math.floor((game.py + PH - 1) / TILE);
+    // Treppen blockieren seitlich nur in der Luft: am Boden greift das
+    // Stufensteigen bzw. man läuft unter dem Lauf hindurch; wer in die
+    // Flanke springt, prallt ab statt hindurchzurutschen.
+    const blocksX = tt => SOLID(tt) || (tt === T.STAIR && !game.onGround);
     if (dx > 0){
       const tx = Math.floor((game.px + PW) / TILE);
       for (let ty=y0; ty<=y1; ty++){
-        if (SOLID(tileAtPlay(room, tx, ty))){ game.px = tx*TILE - PW - 0.01; break; }
+        if (blocksX(tileAtPlay(room, tx, ty))){ game.px = tx*TILE - PW - 0.01; break; }
       }
     } else {
       const tx = Math.floor(game.px / TILE);
       for (let ty=y0; ty<=y1; ty++){
-        if (SOLID(tileAtPlay(room, tx, ty))){ game.px = (tx+1)*TILE + 0.01; break; }
+        if (blocksX(tileAtPlay(room, tx, ty))){ game.px = (tx+1)*TILE + 0.01; break; }
       }
     }
     // Feine Treppe: beim Laufen automatisch die nächste Stufe hinaufsteigen
