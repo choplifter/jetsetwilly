@@ -2527,31 +2527,30 @@ function physTick(){
   if (dx !== 0){
     const y0 = Math.floor(game.py / TILE);
     const y1 = Math.floor((game.py + PH - 1) / TILE);
-    // Treppen blockieren seitlich nur beim FALLEN und nur als echte Flanke:
-    // In der Steigphase eines Sprungs fliegt Willy frei durch die Stufen
-    // (Durchspringen von unten/schräg), beim Herabfallen fängt ihn die
-    // Flanke bzw. die Stufenoberseite – kein Hindurchrutschen. Am Boden
-    // greift das Stufensteigen bzw. man läuft unter dem Lauf hindurch.
-    const blocksX = (tt, ty) => SOLID(tt) ||
-      (tt === T.STAIR && !game.onGround && game.vy >= 0 && ty*TILE < game.py + PH - 6);
+    // Treppen sind in der Luft frei durchspringbar (wie Plattformen);
+    // nur echte Wände blockieren seitlich.
     if (dx > 0){
       const tx = Math.floor((game.px + PW) / TILE);
       for (let ty=y0; ty<=y1; ty++){
-        if (blocksX(tileAtPlay(room, tx, ty), ty)){ game.px = tx*TILE - PW - 0.01; break; }
+        if (SOLID(tileAtPlay(room, tx, ty))){ game.px = tx*TILE - PW - 0.01; break; }
       }
     } else {
       const tx = Math.floor(game.px / TILE);
       for (let ty=y0; ty<=y1; ty++){
-        if (blocksX(tileAtPlay(room, tx, ty), ty)){ game.px = (tx+1)*TILE + 0.01; break; }
+        if (SOLID(tileAtPlay(room, tx, ty))){ game.px = (tx+1)*TILE + 0.01; break; }
       }
     }
-    // Feine Treppe: beim Laufen automatisch die nächste Stufe hinaufsteigen
+    // Feine Treppe: beim Laufen automatisch die nächste Stufe hinaufsteigen.
+    // Wichtig: Willy wird mit Mindestüberlappung auf der Stufe verankert,
+    // damit die Standfläche im nächsten Frame wirklich trägt.
     if (game.onGround){
       const lead = dx > 0 ? Math.floor((game.px + PW) / TILE) : Math.floor(game.px / TILE);
       const stepRow = Math.floor((game.py + PH) / TILE) - 1;
       if (stepRow >= 0 && tileAtPlay(room, lead, stepRow) === T.STAIR &&
           canStand(room, game.px, stepRow*TILE - PH)){
         game.py = stepRow*TILE - PH;
+        if (dx > 0) game.px = Math.max(game.px, lead*TILE + 2 - PW);
+        else game.px = Math.min(game.px, (lead+1)*TILE - 2);
       }
     }
     if (move !== 0 && game.onGround) game.walkFrame++;
