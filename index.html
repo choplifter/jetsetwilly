@@ -2998,6 +2998,13 @@ function renderTitle(){
   ctx.font = "11px Consolas, monospace";
   ctx.fillText("E = EDITOR   ·   M = MUSIK", W/2, 232);
 
+  // Versionsanzeige (Stand des Standard-Levels)
+  ctx.textAlign = "right";
+  ctx.fillStyle = "#666688";
+  ctx.font = "10px Consolas, monospace";
+  ctx.fillText("V" + DEFAULT_REV, W-6, H-14);
+  ctx.textAlign = "center";
+
   // Laufschrift
   ctx.font = "bold 12px Consolas, monospace";
   ctx.fillStyle = "#ffff00";
@@ -3478,7 +3485,9 @@ const roomCoordSpan = document.getElementById("roomCoord");
 function refreshRoomUI(){
   const room = world.rooms[roomKey(edit.x, edit.y)];
   roomNameInput.value = room ? room.name : "";
-  roomCoordSpan.textContent = "Raum " + (edit.x+1) + "/" + (edit.y+1);
+  const outdated = world.custom && world.defaultRev !== DEFAULT_REV;
+  roomCoordSpan.textContent = "Raum " + (edit.x+1) + "/" + (edit.y+1) +
+    (outdated ? " · Standard-Level veraltet – ↺ lädt V" + DEFAULT_REV : "");
   airChk.checked = !!(room && room.air);
   [...colorsDiv.children].forEach((el,i)=>el.classList.toggle("sel", room && room.color===i));
 }
