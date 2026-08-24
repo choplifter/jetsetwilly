@@ -83,6 +83,10 @@
     flex:1; background:#101018; border:2px solid var(--border); color:var(--ink);
     font-family:inherit; font-size:13px; padding:5px 8px; min-width:0;
   }
+  select#savesSel{
+    flex:1; background:#101018; border:2px solid var(--border); color:var(--ink);
+    font-family:inherit; font-size:12px; padding:5px 4px; min-width:0;
+  }
   #colors{display:flex; gap:4px;}
   .swatch{width:22px; height:22px; border:2px solid var(--border); cursor:pointer;}
   .swatch.sel{border-color:#fff;}
@@ -155,6 +159,16 @@
     <div class="row"><span style="font-size:11px">Farbe:</span><div id="colors"></div></div>
     <div class="row"><button id="clearRoomBtn">Raum leeren</button><span id="roomCoord" style="font-size:11px;color:#8888aa"></span></div>
     <label class="row" style="font-size:11px;cursor:pointer"><input type="checkbox" id="airChk"> Luftvorrat (Manic-Miner-Raum)</label>
+
+    <h2>MEINE LEVEL</h2>
+    <div class="row">
+      <button id="saveWorldBtn">💾 Sichern…</button>
+      <select id="savesSel"></select>
+    </div>
+    <div class="row">
+      <button id="loadWorldBtn">Laden</button>
+      <button id="delSaveBtn">Löschen</button>
+    </div>
 
     <p class="hint">
       <b>Linksklick</b> malen · <b>Rechtsklick</b> löschen · Werkzeuge: <b>1–9, 0, R, O, B, D, F, N, P, L, Q, E, V, J</b><br>
@@ -1176,12 +1190,12 @@ function drawBitmapFlipped(ctx, bmp, x, y, scale, color){
 // * Flasche  H/V Wächter  O Oma  B Bett  S Start  . leer
 // ================================================================
 const DEFAULT_ROOMS = [
-{ x:2, y:1, name:"Das Badezimmer", color:0, guards:[], ropes:[[23,0,5]],
+{ x:2, y:1, name:"Das Badezimmer", color:0, guards:[], ropes:[[26,0,5]],
   decos:[[21,14,0],[25,14,1]], rows:[
-"###....#########################",
+"######################...#######",
 "#..............................#",
 "#..*...........................#",
-"#..====........................#",
+"#..====...............===......#",
 "#........................*.....#",
 "####################T###########",
 "#...................T.#........#",
@@ -1193,14 +1207,14 @@ const DEFAULT_ROOMS = [
 "#.............T................#",
 ".........====...................",
 "...................S............",
-"##########################....##",
+"###########################...##",
 ]},
 { x:2, y:2, name:"Die Eingangshalle", color:0, guards:[10,1], ropes:[[14,0,8]],
   decos:[[12,1,5],[18,13,8],[5,4,6],[10,6,6],[1,14,11],[24,13,13],[12,14,16]], rows:[
-"##########################....##",
+"###########################...##",
 "#..............................#",
 "#..........................*...#",
-"#.........................====.#",
+"#..........................===.#",
 "#.................V............#",
 "#...................====.......#",
 "#..............................#",
@@ -1212,7 +1226,7 @@ const DEFAULT_ROOMS = [
 "#.......T......................#",
 "...====T..H.....................",
 "......T.........................",
-"###....#########################",
+"###...##########################",
 ]},
 { x:3, y:2, name:"Die Küche", color:3, guards:[16,0,4],
   decos:[[7,14,10],[1,14,3],[3,14,4],[26,5,7],[12,14,16],[23,14,10],[26,14,4]], rows:[
@@ -1231,14 +1245,14 @@ const DEFAULT_ROOMS = [
 "#...............V..............#",
 ".....====.......................",
 "................................",
-"###################....#########",
+"####################...#########",
 ]},
 { x:4, y:2, name:"Die Speisekammer", color:5, guards:[15,5],
   decos:[[26,13,9],[2,13,9],[5,14,3]], rows:[
-"####....########################",
+"#####...########################",
 "#..............................#",
 "#....*.................*.......#",
-"#...====.............====......#",
+"#....===.............====......#",
 "#..............................#",
 "#..........>>>>>>..............#",
 "#..............................#",
@@ -1254,10 +1268,10 @@ const DEFAULT_ROOMS = [
 ]},
 { x:2, y:3, name:"Der Weinkeller", color:1, guards:[13,5],
   decos:[[24,13,9],[27,13,9],[17,14,3],[20,14,4]], rows:[
-"###....#########################",
+"###...##########################",
 "#..............................#",
-"#.*............................#",
-"#.=====........................#",
+"#..*...........................#",
+"#..===.........................#",
 "#..............................#",
 "#........>>>>>>>...............#",
 "#..............................#",
@@ -1311,10 +1325,10 @@ const DEFAULT_ROOMS = [
 ]},
 { x:3, y:3, name:"Der Kühlraum", color:4, guards:[11,2],
   decos:[[2,14,3],[6,6,6],[5,14,11]], rows:[
-"###################....#########",
+"####################...#########",
 "#..............................#",
 "#....................*.........#",
-"#..................=====.......#",
+"#...................===........#",
 "#..............................#",
 "#.......................====...#",
 "#..............................#",
@@ -1330,10 +1344,10 @@ const DEFAULT_ROOMS = [
 ]},
 { x:1, y:2, name:"Ballsaal Ost", color:2, guards:[3,3],
   decos:[[7,1,5],[21,1,5],[28,13,8],[3,5,6],[27,7,6],[24,13,18]], rows:[
-"##############....##############",
+"###############...##############",
 "#..............................#",
 "#..............*...............#",
-"#.............=====............#",
+"#..............===.............#",
 "#..............................#",
 "#........====......====........#",
 "#A.............................#",
@@ -1368,7 +1382,7 @@ const DEFAULT_ROOMS = [
 ]},
 { x:1, y:1, name:"Der Treppenabsatz", color:5, guards:[1],
   decos:[[27,13,8],[4,4,6],[7,7,6],[27,4,7],[2,13,17],[5,14,16]], rows:[
-"#######################....#####",
+"########################...#####",
 "#..............................#",
 "#......................*.......#",
 "#..................T...====....#",
@@ -1383,7 +1397,7 @@ const DEFAULT_ROOMS = [
 "#.........T....................#",
 "#........T......................",
 "#.......T.......................",
-"##############....##############",
+"###############...##############",
 ]},
 { x:1, y:0, name:"Auf dem Dach", color:6, guards:[19,6],
   decos:[[1,13,12],[28,13,12]], rows:[
@@ -1402,7 +1416,7 @@ const DEFAULT_ROOMS = [
 "#..................T...........#",
 "#...............H...T...........",
 "#..#...#...#.........T..........",
-"#######################....#####",
+"########################...#####",
 ]},
 { x:2, y:0, name:"Der Dachboden", color:2, guards:[7,2],
   decos:[[27,13,8],[13,14,3],[27,6,6],[20,13,14],[2,13,17]], rows:[
@@ -1419,9 +1433,9 @@ const DEFAULT_ROOMS = [
 "#...............H..............#",
 "#........====..................#",
 "#..............................#",
-"........====......H.............",
+"....H...====....................",
 "................................",
-"###....#########################",
+"######################...#######",
 ]},
 { x:3, y:0, name:"Unterm Dach", color:5, guards:[4,17], ropes:[[12,0,7]],
   decos:[[21,10,7],[17,14,3],[2,14,11]], rows:[
@@ -1478,11 +1492,11 @@ const DEFAULT_ROOMS = [
 "#.....................T........#",
 "#.........H..........T.........#",
 "#...................T..........#",
-"####....########################",
+"#####...########################",
 ]},
 { x:5, y:2, name:"Der Ostflügel", color:0, guards:[20],
   decos:[[8,13,17],[26,13,8],[12,14,16]], rows:[
-"#######################....#####",
+"########################...#####",
 "#..............................#",
 "#.......................*......#",
 "#......................====....#",
@@ -1516,7 +1530,7 @@ const DEFAULT_ROOMS = [
 "#..............................#",
 "#........====....====..........#",
 "#..............................#",
-"#######################....#####",
+"########################...#####",
 ]},
 { x:5, y:3, name:"Die Schatzkammer", color:5, guards:[18],
   decos:[[22,13,17]], rows:[
@@ -1592,7 +1606,7 @@ function parseAsciiRoom(def){
   return { room, start };
 }
 
-const DEFAULT_REV = 12;  // bei jeder Änderung am Standard-Level erhöhen
+const DEFAULT_REV = 13;  // bei jeder Änderung am Standard-Level erhöhen
 
 function buildDefaultWorld(){
   const w = { start:{rx:2,ry:1,tx:5,ty:14}, rooms:{}, defaultRev:DEFAULT_REV, custom:false };
@@ -2564,8 +2578,9 @@ function physTick(){
     if (game.py + PH < 14){
       if (world.rooms[roomKey(game.rx, game.ry-1)]){
         enterRoom(game.rx, game.ry-1, game.px, H - PH - 6); switched = true;
-        // Schwung mitnehmen, damit Willy im oberen Raum neben der Lücke landen kann
-        game.vy = Math.min(game.vy, -4.5);
+        // Kräftig Schwung mitnehmen, damit Willy im oberen Raum genug Zeit hat,
+        // seitlich auf die Bodenkante neben der Lücke zu driften
+        game.vy = Math.min(game.vy, -5.5);
       } else if (game.py < 0){ game.py = 0; game.vy = 0; }
     } else if (game.py > H - 6){
       if (world.rooms[roomKey(game.rx, game.ry+1)]){
@@ -3497,6 +3512,66 @@ airChk.addEventListener("change", () => {
   room.air = airChk.checked;
   scheduleSave();
 });
+
+// ---------- Meine Level: benannte, dauerhafte Speicherstände ----------
+const SAVES_KEY = "jsw-saves-v1";
+function loadSaves(){
+  try{
+    const s = JSON.parse(localStorage.getItem(SAVES_KEY));
+    if (s && typeof s === "object" && !Array.isArray(s)) return s;
+  }catch(e){}
+  return {};
+}
+function storeSaves(s){
+  try{ localStorage.setItem(SAVES_KEY, JSON.stringify(s)); }
+  catch(e){ alert("Speichern fehlgeschlagen – Browser-Speicher voll?"); }
+}
+const savesSel = document.getElementById("savesSel");
+function refreshSaves(){
+  const s = loadSaves();
+  const names = Object.keys(s).sort();
+  savesSel.innerHTML = "";
+  if (!names.length){
+    const o = document.createElement("option");
+    o.value = ""; o.textContent = "– keine –";
+    savesSel.appendChild(o);
+  }
+  for (const n of names){
+    const o = document.createElement("option");
+    o.value = n; o.textContent = n;
+    savesSel.appendChild(o);
+  }
+}
+document.getElementById("saveWorldBtn").addEventListener("click", () => {
+  const n = (prompt("Name für diesen Level-Spielstand:") || "").trim().slice(0, 24);
+  if (!n) return;
+  const s = loadSaves();
+  if (s[n] && !confirm('"' + n + '" überschreiben?')) return;
+  s[n] = JSON.parse(JSON.stringify(world));
+  storeSaves(s);
+  refreshSaves();
+  savesSel.value = n;
+});
+document.getElementById("loadWorldBtn").addEventListener("click", () => {
+  const n = savesSel.value;
+  const s = loadSaves();
+  if (!n || !s[n]) return;
+  if (!confirm('"' + n + '" laden? Der aktuelle Arbeitsstand wird ersetzt (vorher ggf. sichern).')) return;
+  world = normalizeWorld(JSON.parse(JSON.stringify(s[n])));
+  world.custom = true;
+  setMode("edit");
+  edit.x = world.start.rx; edit.y = world.start.ry;
+  refreshRoomUI(); refreshMapGrid(); scheduleSave();
+});
+document.getElementById("delSaveBtn").addEventListener("click", () => {
+  const n = savesSel.value;
+  const s = loadSaves();
+  if (!n || !s[n]) return;
+  if (!confirm('"' + n + '" endgültig löschen?')) return;
+  delete s[n];
+  storeSaves(s);
+  refreshSaves();
+});
 roomNameInput.addEventListener("input", () => {
   const room = curEditRoom(true);
   room.name = roomNameInput.value || "Unbenannter Raum";
@@ -3690,7 +3765,7 @@ musicBtn.addEventListener("click", () => {
 world = loadWorld();
 edit.x = world.start.rx; edit.y = world.start.ry;
 buildTools(); buildGuardSprites(); buildDecoSprites(); buildColors(); buildMapGrid();
-refreshRoomUI(); refreshMapGrid();
+refreshRoomUI(); refreshMapGrid(); refreshSaves();
 setMode("title");
 cv.focus();
 
