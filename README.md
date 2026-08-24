@@ -2,6 +2,8 @@
 
 Eine Hommage an den ZX-Spectrum-Klassiker als einzelne HTML-Datei. Einfach `index.html` im Browser öffnen – keine Installation, kein Server nötig.
 
+**Online spielen:** https://choplifter.github.io/jetsetwilly/ – auch auf dem Handy: Auf Touch-Geräten erscheinen automatisch On-Screen-Tasten (◀ ▶ laufen, ● springen, ▲▼ Lianen klettern, ⏎/ESC Menü).
+
 ## Die Geschichte
 
 Willy hat die Party des Jahrhunderts gefeiert – überall im Herrenhaus liegen Flaschen herum. Die Oma lässt ihn erst ins Schlafzimmer, wenn **alle Flaschen** eingesammelt sind. Dann darf Willy endlich ins Bett.
@@ -25,7 +27,7 @@ Willy hat die Party des Jahrhunderts gefeiert – überall im Herrenhaus liegen 
 
 - **Linksklick** malen, **Rechtsklick** löschen; Werkzeuge per Taste **1–9, 0, R, O, B, D, F, P, L, Q, E, V, J**
 - Werkzeuge: Kacheln (inkl. Strahl, MM-Bänder, Schwundboden), Flasche, Wächter (↔/↕/↓), **Liane**, **Oma**, **Bett**, **Portal**, **Deko**, Startpunkt
-- **18 Wächter-Sprites**: Säge, Mönch, Pinguin, Zylindermann, Geist, Fass, Hase, fliegendes Schwein, Skylab, Spinne, Fledermaus, Roboter, Vogel, Totenkopf, Känguru, Seehund (mit Ball), mutiertes Telefon, Krabbe
+- **21 Wächter-Sprites**: Säge, Mönch, Pinguin, Zylindermann, Geist, Fass, Hase, fliegendes Schwein, Skylab, Spinne, Fledermaus, Roboter, Vogel, Totenkopf, Känguru, Seehund (mit Ball), mutiertes Telefon, Krabbe, **Ritter**, **Drache**, **rotierendes Schwert**
 - **Pfeile (N)**: tödliche Querschläger im JSW-Stil – schießen periodisch mit Warnton über den Bildschirm (schmale Trefferzone, nur der Schaft); Platzierung links = Flug nach rechts, rechts = nach links
 - **Förderbänder** mit den typischen zwei gegenläufig laufenden Kettenreihen; der **Sumpf** (Bröckelboden) hat jetzt Modder-Textur mit ausfransender Abbruchkante
 - **19 Deko-Typen** (reine Kulisse): Badewanne, Klo, Waschbecken, Tisch, Stuhl, Kronleuchter, Bild, Fenster, Standuhr, Weinregal, Herd, Pflanze, Schornstein, **Kamin (mit Feuer)**, **Bücherregal**, **Spiegel**, **Teppich**, **Ritterrüstung**, **Stehlampe**
@@ -34,19 +36,24 @@ Willy hat die Party des Jahrhunderts gefeiert – überall im Herrenhaus liegen 
 
 ## Das Herrenhaus (Standard-Level)
 
-15 Räume, 33 Flaschen. Wie im Original startet Willy im **Badezimmer**:
+19 Räume, 42 Flaschen. Wie im Original startet Willy im **Badezimmer**:
 
 ```
              Auf dem Dach — Der Dachboden — Unterm Dach
                   |              |
-             Treppenabsatz — Das Badezimmer — Das Schlafzimmer (Oma + Bett)
-                  |              |
-Ballsaal West — Ballsaal Ost — Eingangshalle — Die Küche — Die Speisekammer
-      ↑                          |              |
-      ↑ (Portal)            Der Weinkeller — Der Kühlraum
-      ↑                          |
+             Treppenabsatz — Das Badezimmer — Das Schlafzimmer     Der Rittersaal   Die Bibliothek
+                  |              |            (Oma + Bett)              |                |
+Ballsaal West — Ballsaal Ost — Eingangshalle — Die Küche — Die Speisekammer — Der Ostflügel
+      ↑                          |              |                                       |
+      ↑ (Portal)            Der Weinkeller — Der Kühlraum                       Die Schatzkammer
+      ↑                          |                                              (Hebel-Rätsel)
 Der Stollen — Die Zentrale Höhle (Mine, Manic-Miner-Regeln)
 ```
+
+## Treppen & Rätsel
+
+- **Treppen (T)**: Steinstufen, die Willy beim Laufen automatisch hinaufsteigt – kein Springen nötig. Große Treppenaufgänge im Rittersaal und Ostflügel.
+- **Hebel & Gitter (U / I)**: Ein berührter Hebel öffnet alle Gittertüren seines Raums (einmal pro Partie). In der Schatzkammer bewacht ein Ritter hinter Gittern drei Flaschen – der Hebel sitzt am anderen Ende des Raums, und das geöffnete Gitter lässt auch den Ritter frei …
 
 ## Highscores & Punkte
 

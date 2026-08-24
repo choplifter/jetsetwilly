@@ -38,8 +38,25 @@
   canvas#cv{
     width:100%; image-rendering:pixelated; image-rendering:crisp-edges;
     background:#000; border:3px solid var(--border); display:block;
-    outline:none;
+    outline:none; touch-action:none;
   }
+  /* Touch-Steuerung: erscheint nur auf Geräten mit Touch-Bedienung */
+  #touch{
+    display:none; justify-content:space-between; align-items:flex-end;
+    gap:10px; margin-top:10px; user-select:none; -webkit-user-select:none;
+  }
+  @media (pointer: coarse){ #touch{ display:flex; } }
+  .tc-group{ display:flex; gap:10px; align-items:flex-end; }
+  .tc{
+    width:64px; height:64px; border-radius:50%;
+    background:rgba(51,51,77,0.55); border:2px solid var(--border);
+    color:var(--ink); font-size:24px; touch-action:none;
+    display:flex; align-items:center; justify-content:center; padding:0;
+  }
+  .tc:active{ background:rgba(0,216,216,0.4); border-color:var(--accent2); }
+  .tc.jump{ width:76px; height:76px; border-color:var(--accent); color:var(--accent); font-size:30px; }
+  .tc.half{ width:52px; height:52px; font-size:18px; }
+  .tc.mini{ width:46px; height:46px; border-radius:10px; font-size:13px; }
   aside#editor{
     flex:0 0 290px; background:var(--panel); border:2px solid var(--border);
     padding:12px; display:flex; flex-direction:column; gap:10px; align-self:flex-start;
@@ -101,7 +118,24 @@
 </header>
 
 <main>
-  <div id="gamewrap"><canvas id="cv" width="512" height="300" tabindex="0"></canvas></div>
+  <div id="gamewrap">
+    <canvas id="cv" width="512" height="300" tabindex="0"></canvas>
+    <div id="touch">
+      <div class="tc-group">
+        <button class="tc" data-key="ArrowLeft">◀</button>
+        <button class="tc" data-key="ArrowRight">▶</button>
+      </div>
+      <div class="tc-group">
+        <button class="tc mini" data-key="Enter">⏎</button>
+        <button class="tc mini" data-key="Escape">ESC</button>
+      </div>
+      <div class="tc-group">
+        <button class="tc half" data-key="ArrowUp">▲</button>
+        <button class="tc half" data-key="ArrowDown">▼</button>
+        <button class="tc jump" data-key="Space">●</button>
+      </div>
+    </div>
+  </div>
 
   <aside id="editor">
     <h2>WERKZEUGE</h2>
@@ -124,7 +158,8 @@
 
     <p class="hint">
       <b>Linksklick</b> malen · <b>Rechtsklick</b> löschen · Werkzeuge: <b>1–9, 0, R, O, B, D, F, N, P, L, Q, E, V, J</b><br>
-      <b>Pfeile (N)</b> schießen periodisch quer durchs Bild – linke Hälfte platziert = fliegt nach rechts, rechte = nach links.<br>
+      <b>Pfeile (N)</b> schießen periodisch quer durchs Bild – linke Hälfte platziert = fliegt nach rechts, rechte = nach links.
+      <b>Treppen (T)</b> steigt Willy beim Laufen automatisch hinauf. Der <b>Hebel (U)</b> öffnet alle <b>Gitter (I)</b> seines Raums – Baustein für Rätsel.<br>
       <b>Deko</b> ist reine Kulisse. <b>Portale</b> teleportieren paarweise (frei, wenn die Flaschen
       des Raums gesammelt sind). <b>Wächter↓</b> stürzt wie ein Skylab ab, der <b>Strahl</b> saugt
       Luft ab. <b>MM-Bänder</b> zwingen die Laufrichtung, <b>Schwundböden</b> verschwinden dauerhaft.
@@ -169,9 +204,10 @@ const AIR_MAX = 2100;           // Luftvorrat in Frames (Manic-Miner-Räume)
 const VANISH_TIME = 24;         // Schwundboden: Frames bis endgültig weg
 
 const T = { EMPTY:0, WALL:1, PLAT:2, SPIKE:3, CONVL:4, CONVR:5, CRUMBLE:6, SOLAR:7,
-            CONVML:8, CONVMR:9, VANISH:10 };
+            CONVML:8, CONVMR:9, VANISH:10, STAIR:11, GATE:12 };
 const SOLID = t => t === T.WALL || t === T.CONVL || t === T.CONVR || t === T.CRUMBLE ||
-                   t === T.CONVML || t === T.CONVMR || t === T.VANISH;
+                   t === T.CONVML || t === T.CONVMR || t === T.VANISH ||
+                   t === T.STAIR || t === T.GATE;
 const BLOCKS_GUARD = t => SOLID(t) || t === T.PLAT;
 
 const BRIGHT = ['#00ffff','#ff00ff','#ffff00','#00ff00','#ff5555','#ffffff'];
@@ -953,6 +989,117 @@ const GUARD_SPRITES = [
 "................",
 "................",
 ]]},
+{ name:"Ritter", frames:[
+[
+"......#.........",
+".....###........",
+"....######......",
+"....######......",
+"....##.###......",
+"....######......",
+"...########..#..",
+"..##.######..#..",
+"..##.######..#..",
+"..##.######.##..",
+"...########..#..",
+"....######...#..",
+"....##..##......",
+"....##..##......",
+"....##..##......",
+"...###..###.....",
+],
+[
+"......#.........",
+".....###........",
+"....######......",
+"....######......",
+"....##.###......",
+"....######......",
+"...########..#..",
+"..##.######..#..",
+"..##.######..#..",
+"..##.######.##..",
+"...########..#..",
+"....######...#..",
+"...##....##.....",
+"...##....##.....",
+"..##......##....",
+".###.......###..",
+]]},
+{ name:"Drache", frames:[
+[
+"................",
+"................",
+"..##............",
+"..###...........",
+"..#####.........",
+"...########.....",
+"....##########..",
+"...#########.##.",
+"..###########...",
+".##.#########...",
+"##...#######....",
+".....##..##.#...",
+"....##....##....",
+"................",
+"................",
+"................",
+],
+[
+"................",
+"................",
+"................",
+"................",
+"................",
+"...########.....",
+"..############..",
+"..##########.##.",
+".#############..",
+".##.#########...",
+"##...#######....",
+".....##..##.#...",
+"....##....##....",
+"................",
+"................",
+"................",
+]]},
+{ name:"Schwert", frames:[
+[
+"................",
+".......##.......",
+".......##.......",
+".......##.......",
+".......##.......",
+".......##.......",
+".......##.......",
+".......##.......",
+".......##.......",
+".......##.......",
+".....######.....",
+".......##.......",
+".......##.......",
+"......####......",
+"................",
+"................",
+],
+[
+"................",
+"................",
+"................",
+"................",
+"................",
+"................",
+"...........#....",
+"###########.##.#",
+"...........#....",
+"................",
+"................",
+"................",
+"................",
+"................",
+"................",
+"................",
+]]},
 { name:"Pfeil", frames:[
 [
 "................",
@@ -1089,7 +1236,7 @@ const DEFAULT_ROOMS = [
 ]},
 { x:4, y:2, name:"Die Speisekammer", color:5, guards:[15,5],
   decos:[[26,13,9],[2,13,9],[5,14,3]], rows:[
-"################################",
+"#####...########################",
 "#..............................#",
 "#....*.................*.......#",
 "#...====.............====......#",
@@ -1102,8 +1249,8 @@ const DEFAULT_ROOMS = [
 "#..............................#",
 "#....====.......====...........#",
 "#..............................#",
-"..........====..H..............#",
-"...............................#",
+"..........====..H...............",
+"................................",
 "################################",
 ]},
 { x:2, y:3, name:"Der Weinkeller", color:1, guards:[13,5],
@@ -1315,6 +1462,82 @@ const DEFAULT_ROOMS = [
 "..........................B....#",
 "################################",
 ]},
+{ x:4, y:1, name:"Der Rittersaal", color:6, guards:[18,18],
+  decos:[[10,1,5],[2,13,17],[16,13,17],[5,14,16],[4,4,6]], rows:[
+"################################",
+"#..............................#",
+"#..............................#",
+"#..............................#",
+"#..............................#",
+"#.............H................#",
+"#..............................#",
+"#...........................*..#",
+"#.........................T....#",
+"#........................T.....#",
+"#.......................T......#",
+"#.....................*T.......#",
+"#.....................T........#",
+"#.........H..........T.........#",
+"#...................T..........#",
+"#####...########################",
+]},
+{ x:5, y:2, name:"Der Ostflügel", color:0, guards:[20],
+  decos:[[8,13,17],[26,13,8],[12,14,16]], rows:[
+"########################...#####",
+"#..............................#",
+"#.......................*......#",
+"#......................====....#",
+"#..........V...................#",
+"#..................T...........#",
+"#.................T............#",
+"#...............*T.............#",
+"#...............T..............#",
+"#..............T...............#",
+"#.............T................#",
+"#.........====.................#",
+"#..............................#",
+"......====.....................#",
+"...............................#",
+"###...##########################",
+]},
+{ x:5, y:1, name:"Die Bibliothek", color:1, guards:[10],
+  decos:[[2,13,14],[14,13,14],[27,13,14],[22,13,18],[6,4,6]], rows:[
+"################################",
+"#..............................#",
+"#....*.................*.......#",
+"#...====..............====.....#",
+"#..............................#",
+"#........====......====........#",
+"#..............................#",
+"#....====......====............#",
+"#..............................#",
+"#.........====.......====......#",
+"#..............V...............#",
+"#.....====..........====.......#",
+"#..............................#",
+"#........====....====..........#",
+"#..............................#",
+"########################...#####",
+]},
+{ x:5, y:3, name:"Die Schatzkammer", color:5, guards:[18],
+  decos:[[22,13,17]], rows:[
+"###...##########################",
+"#..............................#",
+"#..............................#",
+"#.=====........................#",
+"#..............................#",
+"#....====......................#",
+"#..............................#",
+"#.......====...................#",
+"#..............................#",
+"#..........====................#",
+"#..............................#",
+"#.............====.............#",
+"#..............................#",
+"#.!..............====...G.H..*.#",
+"#.......................G.*.*..#",
+"################################",
+]},
 ];
 
 // ---------- Welt ----------
@@ -1327,7 +1550,7 @@ function makeEmptyRoom(name, color, bordered){
     for (let x=0;x<COLS;x++){ tiles[x] = T.WALL; tiles[(ROWS-1)*COLS+x] = T.WALL; }
     for (let y=0;y<ROWS;y++){ tiles[y*COLS] = T.WALL; tiles[y*COLS+COLS-1] = T.WALL; }
   }
-  return { name: name||"Unbenannter Raum", color: color||0, tiles, items:[], guardians:[], granny:null, bed:null, decos:[], portal:null, air:false, ropes:[] };
+  return { name: name||"Unbenannter Raum", color: color||0, tiles, items:[], guardians:[], granny:null, bed:null, decos:[], portal:null, air:false, ropes:[], switches:[] };
 }
 
 function parseAsciiRoom(def){
@@ -1345,6 +1568,9 @@ function parseAsciiRoom(def){
       else if (c==='(') t=T.CONVML;
       else if (c===')') t=T.CONVMR;
       else if (c==='~') t=T.VANISH;
+      else if (c==='T') t=T.STAIR;
+      else if (c==='G') t=T.GATE;
+      else if (c==='!') room.switches.push({tx:x,ty:y});
       else if (c==='*') room.items.push({tx:x,ty:y});
       else if (c==='H') room.guardians.push({tx:x,ty:y,axis:'h',sprite:0});
       else if (c==='V') room.guardians.push({tx:x,ty:y,axis:'v',sprite:0});
@@ -1388,6 +1614,7 @@ function normalizeWorld(w){
     r.portal = r.portal || null;
     r.air = !!r.air;
     r.ropes = r.ropes || [];
+    r.switches = r.switches || [];
     r.name = r.name || "Raum"; r.color = r.color || 0;
   }
   return w;
@@ -1414,7 +1641,8 @@ function loadWorld(){
       const names = Object.values(w.rooms).map(r=>r.name).sort().join("|");
       return names === "Der Dachboden|Der Weinkeller|Die Eingangshalle|Die Küche" ||
              names === "Das Schlafzimmer|Der Dachboden|Der Weinkeller|Die Eingangshalle|Die Küche" ||
-             names === "Auf dem Dach|Ballsaal Ost|Ballsaal West|Das Badezimmer|Das Schlafzimmer|Der Dachboden|Der Kühlraum|Der Treppenabsatz|Der Weinkeller|Die Eingangshalle|Die Küche|Die Speisekammer|Unterm Dach";
+             names === "Auf dem Dach|Ballsaal Ost|Ballsaal West|Das Badezimmer|Das Schlafzimmer|Der Dachboden|Der Kühlraum|Der Treppenabsatz|Der Weinkeller|Die Eingangshalle|Die Küche|Die Speisekammer|Unterm Dach" ||
+             names === "Auf dem Dach|Ballsaal Ost|Ballsaal West|Das Badezimmer|Das Schlafzimmer|Der Dachboden|Der Kühlraum|Der Stollen|Der Treppenabsatz|Der Weinkeller|Die Eingangshalle|Die Küche|Die Speisekammer|Die Zentrale Höhle|Unterm Dach";
     };
     const raw = localStorage.getItem(LS_KEY);
     if (raw){
@@ -1485,6 +1713,7 @@ const sndCrash   = ()=>{ sweep(320, 50, 0.18, 'sawtooth', 0.05); };
 const sndTeleport= ()=>{ sweep(180, 1400, 0.28, 'square', 0.05); setTimeout(()=>sweep(1400, 400, 0.18, 'square', 0.04), 120); };
 const sndAirWarn = ()=>{ if(!sfxMuted) tone(1250, 0.05, 'square', 0.04); };
 const sndArrow   = ()=>{ if(!sfxMuted) tone(1600, 0.05, 'square', 0.035); };
+const sndSwitch  = ()=>{ sweep(500, 150, 0.12, 'square', 0.06); setTimeout(()=>sweep(700, 300, 0.1, 'square', 0.04), 100); };
 const sndStomp   = ()=>{ sweep(160, 35, 0.35, 'sawtooth', 0.08); };
 const sndFanfare = ()=>{
   if (sfxMuted) return;
@@ -1672,6 +1901,30 @@ function drawTile(ctx, t, px, py, s, wallCol, frame, crumbleDecay){
       ctx.fillRect(px + ((off+6) % 14)*u + u, py, u, s);
       break;
     }
+    case T.STAIR: {
+      // Steinstufe: Willy steigt beim Laufen automatisch hinauf
+      ctx.fillStyle = '#b0b0b0';
+      ctx.fillRect(px, py, s, s);
+      ctx.fillStyle = '#e0e0e0';
+      ctx.fillRect(px, py, s, 2*u);
+      ctx.fillStyle = '#404040';
+      ctx.fillRect(px + s - 2*u, py, 2*u, s);
+      ctx.fillRect(px, py + s - 2*u, s, 2*u);
+      ctx.fillRect(px + 4*u, py + 6*u, 8*u, u);
+      break;
+    }
+    case T.GATE: {
+      // Gittertür: verschwindet, wenn der Hebel im Raum umgelegt wird
+      ctx.fillStyle = '#555577';
+      ctx.fillRect(px, py, s, 2*u);
+      ctx.fillRect(px, py + 7*u, s, 2*u);
+      ctx.fillRect(px, py + 14*u, s, 2*u);
+      ctx.fillStyle = '#aaaaaa';
+      ctx.fillRect(px + 2*u, py, 2*u, s);
+      ctx.fillRect(px + 7*u, py, 2*u, s);
+      ctx.fillRect(px + 12*u, py, 2*u, s);
+      break;
+    }
     case T.VANISH: {
       // Schwundboden: verschwindet beim Betreten dauerhaft (bis Neustart)
       const decay = crumbleDecay || 0;
@@ -1714,6 +1967,16 @@ function drawBed(ctx, tx, ty){
   ctx.fillStyle = '#8a5020';
   ctx.fillRect(x+5, y+12, 3, 4);
   ctx.fillRect(x+25, y+12, 3, 4);
+}
+
+function drawSwitch(ctx, tx, ty, on){
+  const x = tx*TILE, y = ty*TILE;
+  ctx.fillStyle = '#8a5020';
+  ctx.fillRect(x+4, y+11, 8, 5);
+  ctx.fillStyle = '#aaaaaa';
+  ctx.fillRect(on ? x+9 : x+4, y+4, 3, 8);
+  ctx.fillStyle = on ? '#00ff00' : '#ff5555';
+  ctx.fillRect(on ? x+9 : x+4, y+2, 3, 3);
 }
 
 function drawGranny(ctx, tx, ty, frame){
@@ -1929,6 +2192,7 @@ const game = {
   crumble:{}, guards:[], won:false, minutes:420, hintTimer:0,
   air:AIR_MAX, portalCooldown:0,
   score:0, vanish:{}, rope:null, ropeCooldown:0, throwVx:0, nameStr:"",
+  switched:new Set(),
 };
 
 // ---------- Highscores (mit Namenseingabe wie im Original) ----------
@@ -2080,6 +2344,7 @@ function initGame(){
   game.air = AIR_MAX; game.portalCooldown = 0;
   game.score = 0; game.vanish = {}; game.rope = null;
   game.ropeCooldown = 0; game.throwVx = 0; game.nameStr = "";
+  game.switched = new Set();
   const s = world.start;
   if (!world.rooms[roomKey(s.rx,s.ry)]){
     world.rooms[roomKey(s.rx,s.ry)] = makeEmptyRoom("Startraum", 0, true);
@@ -2092,7 +2357,17 @@ function tileAtPlay(room, tx, ty){
   const t = room.tiles[ty*COLS+tx];
   if (t===T.CRUMBLE && (game.crumble[tx+","+ty]||0) >= CRUMBLE_TIME) return T.EMPTY;
   if (t===T.VANISH && (game.vanish[game.rx+","+game.ry+":"+tx+","+ty]||0) >= VANISH_TIME) return T.EMPTY;
+  if (t===T.GATE && game.switched.has(game.rx+","+game.ry)) return T.EMPTY;
   return t;
+}
+
+function canStand(room, px, py){
+  const x0 = Math.floor((px+1)/TILE), x1 = Math.floor((px+PW-1)/TILE);
+  const y0 = Math.floor(py/TILE), y1 = Math.floor((py+PH-1)/TILE);
+  for (let ty=y0; ty<=y1; ty++) for (let tx=x0; tx<=x1; tx++){
+    if (SOLID(tileAtPlay(room, tx, ty))) return false;
+  }
+  return true;
 }
 
 function die(){
@@ -2174,12 +2449,27 @@ function physTick(){
     if (dx > 0){
       const tx = Math.floor((game.px + PW) / TILE);
       for (let ty=y0; ty<=y1; ty++){
-        if (SOLID(tileAtPlay(room, tx, ty))){ game.px = tx*TILE - PW - 0.01; break; }
+        const tt = tileAtPlay(room, tx, ty);
+        if (SOLID(tt)){
+          // Treppe: automatisch eine Stufe hinaufsteigen
+          if (tt === T.STAIR && ty === y1 && game.vy >= 0 && canStand(room, game.px, ty*TILE - PH)){
+            game.py = ty*TILE - PH; game.onGround = true;
+            break;
+          }
+          game.px = tx*TILE - PW - 0.01; break;
+        }
       }
     } else {
       const tx = Math.floor(game.px / TILE);
       for (let ty=y0; ty<=y1; ty++){
-        if (SOLID(tileAtPlay(room, tx, ty))){ game.px = (tx+1)*TILE + 0.01; break; }
+        const tt = tileAtPlay(room, tx, ty);
+        if (SOLID(tt)){
+          if (tt === T.STAIR && ty === y1 && game.vy >= 0 && canStand(room, game.px, ty*TILE - PH)){
+            game.py = ty*TILE - PH; game.onGround = true;
+            break;
+          }
+          game.px = (tx+1)*TILE + 0.01; break;
+        }
       }
     }
     if (move !== 0 && game.onGround) game.walkFrame++;
@@ -2284,6 +2574,23 @@ function physTick(){
       if (allCollected() && !game.won){
         game.won = true;
         if (!worldHasBed()){ winGame(); return; }
+      }
+    }
+  }
+
+  // Hebel umlegen (öffnet alle Gitter dieses Raums)
+  if (curRoom.switches && curRoom.switches.length){
+    const skey = game.rx+","+game.ry;
+    if (!game.switched.has(skey)){
+      for (const sw of curRoom.switches){
+        const sx = sw.tx*TILE, sy = sw.ty*TILE;
+        if (game.px + PW > sx+2 && game.px < sx+14 &&
+            game.py + PH > sy+2 && game.py < sy+14){
+          game.switched.add(skey);
+          game.score += 50;
+          sndSwitch();
+          break;
+        }
       }
     }
   }
@@ -2443,6 +2750,7 @@ function renderRoomTiles(room, isPlay){
         decay = game.vanish[game.rx+","+game.ry+":"+x+","+y] || 0;
         if (decay >= VANISH_TIME) continue;
       }
+      if (t === T.GATE && isPlay && game.switched.has(game.rx+","+game.ry)) continue;
       drawTile(ctx, t, x*TILE, y*TILE, TILE, wallCol, frameCount, decay);
     }
   }
@@ -2690,6 +2998,7 @@ function render(){
       }
       if (room.bed) drawBed(ctx, room.bed.tx, room.bed.ty);
       if (room.portal) drawPortal(ctx, room.portal.tx, room.portal.ty, roomItemsCollected(game.rx, game.ry), frameCount);
+      for (const sw of (room.switches || [])) drawSwitch(ctx, sw.tx, sw.ty, game.switched.has(game.rx+","+game.ry));
       if (room.granny && !allCollected()) drawGranny(ctx, room.granny.tx, room.granny.ty, frameCount);
     }
     for (const g of game.guards) renderGuard(g);
@@ -2811,6 +3120,9 @@ const TOOLS = [
   { id:"convml", label:"MM-Band◀", key:"KeyQ", tile:T.CONVML },
   { id:"convmr", label:"MM-Band▶", key:"KeyE", tile:T.CONVMR },
   { id:"vanish", label:"Schwund",  key:"KeyV", tile:T.VANISH },
+  { id:"stair",  label:"Treppe",   key:"KeyT", tile:T.STAIR },
+  { id:"gate",   label:"Gitter",   key:"KeyI", tile:T.GATE },
+  { id:"switch", label:"Hebel",    key:"KeyU" },
   { id:"rope",   label:"Liane",    key:"KeyJ" },
   { id:"guardh", label:"Wächter↔", key:"Digit8" },
   { id:"guardv", label:"Wächter↕", key:"Digit9" },
@@ -2852,6 +3164,7 @@ function renderEditorOverlay(room){
   for (const it of room.items) drawBottle(ctx, it.tx*TILE, it.ty*TILE, frameCount, it.tx+it.ty);
   if (room.bed) drawBed(ctx, room.bed.tx, room.bed.ty);
   if (room.portal) drawPortal(ctx, room.portal.tx, room.portal.ty, true, frameCount);
+  for (const sw of (room.switches || [])) drawSwitch(ctx, sw.tx, sw.ty, false);
   if (room.granny) drawGranny(ctx, room.granny.tx, room.granny.ty, frameCount);
   room.guardians.forEach((g,i)=>{
     const spr = GUARD_SPRITES[(g.sprite||0) % GUARD_SPRITES.length];
@@ -2892,6 +3205,7 @@ function applyTool(tx, ty, erase){
     if (covers(tx, ty, room.bed, 2, 1)) room.bed = null;
     if (covers(tx, ty, room.portal, 2, 2)) room.portal = null;
     room.ropes = (room.ropes || []).filter(r => !(r.tx === tx && r.ty === ty));
+    room.switches = (room.switches || []).filter(s => !(s.tx === tx && s.ty === ty));
   };
 
   if (erase || tool.id === "erase"){
@@ -2925,6 +3239,12 @@ function applyTool(tx, ty, erase){
     const ex = room.ropes.findIndex(r => r.tx === tx && r.ty === ty);
     if (ex >= 0) room.ropes.splice(ex, 1);
     else room.ropes.push({tx, ty, len: Math.max(4, Math.min(9, 13 - ty))});
+  } else if (tool.id === "switch"){
+    room.tiles[idx] = T.EMPTY;
+    room.switches = room.switches || [];
+    const ex = room.switches.findIndex(s => s.tx === tx && s.ty === ty);
+    if (ex >= 0) room.switches.splice(ex, 1);
+    else room.switches.push({tx, ty});
   } else if (tool.id === "oma"){
     room.granny = {tx:Math.min(tx, COLS-2), ty:Math.min(ty, ROWS-2)};
   } else if (tool.id === "bed"){
@@ -3000,6 +3320,8 @@ function buildTools(){
     } else if (tool.id === "rope"){
       pctx.fillStyle = "#00d800";
       pctx.fillRect(7,0,2,4); pctx.fillRect(8,4,2,4); pctx.fillRect(9,8,2,4); pctx.fillRect(10,12,2,4);
+    } else if (tool.id === "switch"){
+      drawSwitch(pctx, 0, 0, false);
     } else if (tool.id === "oma"){
       drawBitmap(pctx, OMA_F[0], 0, 0, 1, "#ffffff");
     } else if (tool.id === "bed"){
@@ -3214,7 +3536,16 @@ window.addEventListener("keydown", e => {
   } else if (mode === "play"){
     if (e.code === "Escape"){ setMode("edit"); return; }
     if (e.code === "Enter" && (game.state === "gameover" || game.state === "won")){
-      if (scoreQualifies(game.score)){ game.state = "entername"; game.nameStr = ""; }
+      if (scoreQualifies(game.score)){
+        if (isTouchDevice){
+          const n = (prompt("Neuer Highscore (" + game.score + " Punkte)! Dein Name:") || "")
+                    .toUpperCase().replace(/[^A-Z0-9 ]/g, "").slice(0, 8).trim();
+          if (n) insertScore(n, game.score);
+          setMode("title");
+        } else {
+          game.state = "entername"; game.nameStr = "";
+        }
+      }
       else setMode("title");
       return;
     }
@@ -3230,6 +3561,26 @@ window.addEventListener("keydown", e => {
 window.addEventListener("keyup", e => { keys[e.code] = false; });
 window.addEventListener("blur", () => { for (const k in keys) keys[k] = false; });
 window.addEventListener("pointerdown", ensureAudio, {once:false});
+
+// ---------- Touch-Steuerung ----------
+const isTouchDevice = window.matchMedia && matchMedia("(pointer: coarse)").matches;
+document.querySelectorAll("#touch .tc").forEach(btn => {
+  const code = btn.dataset.key;
+  const press = e => {
+    e.preventDefault();
+    ensureAudio();
+    window.dispatchEvent(new KeyboardEvent("keydown", {code}));
+  };
+  const release = e => {
+    e.preventDefault();
+    window.dispatchEvent(new KeyboardEvent("keyup", {code}));
+  };
+  btn.addEventListener("pointerdown", press);
+  btn.addEventListener("pointerup", release);
+  btn.addEventListener("pointercancel", release);
+  btn.addEventListener("pointerleave", release);
+  btn.addEventListener("contextmenu", e => e.preventDefault());
+});
 
 // ================================================================
 // EXPORT / IMPORT / RESET / SOUND-BUTTONS
