@@ -1644,7 +1644,7 @@ function parseAsciiRoom(def){
 }
 
 const DEFAULT_REV = 14;  // bei jeder Änderung am Standard-Level erhöhen
-const BUILD = 16;        // bei JEDER Code-Änderung erhöhen (Anzeige im Titel)
+const BUILD = 17;        // bei JEDER Code-Änderung erhöhen (Anzeige im Titel)
 
 function buildDefaultWorld(){
   const w = { start:{rx:2,ry:1,tx:5,ty:14}, rooms:{}, defaultRev:DEFAULT_REV, custom:false };
@@ -2274,7 +2274,7 @@ const game = {
   crumble:{}, guards:[], won:false, minutes:420, hintTimer:0,
   air:AIR_MAX, portalCooldown:0,
   score:0, vanish:{}, rope:null, ropeCooldown:0, throwVx:0, nameStr:"",
-  switched:new Set(),
+  switched:new Set(), stairThrough:false,
 };
 
 // ---------- Highscores (mit Namenseingabe wie im Original) ----------
@@ -2427,6 +2427,7 @@ function initGame(){
   game.score = 0; game.vanish = {}; game.rope = null;
   game.ropeCooldown = 0; game.throwVx = 0; game.nameStr = "";
   game.switched = new Set();
+  game.stairThrough = false;
   const s = world.start;
   if (!world.rooms[roomKey(s.rx,s.ry)]){
     world.rooms[roomKey(s.rx,s.ry)] = makeEmptyRoom("Startraum", 0, true);
@@ -2544,7 +2545,9 @@ function physTick(){
     // Feine Treppe: beim Laufen automatisch die nächste Stufe hinaufsteigen.
     // Wichtig: Willy wird mit Mindestüberlappung auf der Stufe verankert,
     // damit die Standfläche im nächsten Frame wirklich trägt.
-    if (game.onGround){
+    // Nach einer Sprung-Landung auf der Treppe (stairThrough) ist das
+    // Auto-Steigen aus: Willy läuft geradeaus durch den Lauf hindurch.
+    if (game.onGround && !game.stairThrough){
       const lead = dx > 0 ? Math.floor((game.px + PW) / TILE) : Math.floor(game.px / TILE);
       const stepRow = Math.floor((game.py + PH) / TILE) - 1;
       if (stepRow >= 0 && tileAtPlay(room, lead, stepRow) === T.STAIR &&
@@ -2570,6 +2573,7 @@ function physTick(){
 
   // Vertikal
   const prevBottom = game.py + PH;
+  const wasGrounded = game.onGround;
   game.vy = Math.min(game.vy + GRAV, MAXFALL);
   game.py += game.vy;
   game.onGround = false;
@@ -2587,6 +2591,11 @@ function physTick(){
       // Landung, max. eine Stufenhöhe Anhebung). Steigen bleibt frei.
       if (SOLID(t) || t === T.STAIR || (t===T.PLAT && prevBottom <= top + 4)){
         game.py = top - PH; game.vy = 0; game.onGround = true;
+        // Nur bei ECHTEN Landungen (aus der Luft) umschalten – die
+        // Mikro-Landung beim Stehen darf das Flag nicht überschreiben.
+        // Sprung-Landung auf einer Stufe => "Durchlaufen" (kein Auto-
+        // Steigen); jede andere Landung => wieder normales Klettern.
+        if (!wasGrounded) game.stairThrough = (t === T.STAIR) && game.jumping;
         break;
       }
     }
