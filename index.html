@@ -2,7 +2,14 @@
 <html lang="de">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#101018">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="Jet Set Willy">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
 <title>Jet Set Willy – Mein Herrenhaus</title>
 <style>
   :root{
@@ -104,6 +111,34 @@
   footer{max-width:1150px; width:100%; font-size:11px; color:#666688; line-height:1.6;}
   footer b{color:#9a9ab5;}
   kbd{background:#22223a; border:1px solid var(--border); padding:0 5px; border-radius:3px; color:var(--ink);}
+  /* ---------- Handy ---------- */
+  html, body{ overscroll-behavior:none; }
+  button{ touch-action:manipulation; }
+  #rotateHint{
+    display:none; background:#22224a; border:2px solid var(--border);
+    color:var(--ink); font-size:11px; padding:6px 10px; text-align:center;
+    margin-bottom:8px;
+  }
+  @media (pointer: coarse){
+    footer{ display:none; }
+    body{ padding:6px; gap:6px; }
+    h1{ font-size:15px; letter-spacing:2px; text-shadow:1px 1px 0 #d80000, 2px 2px 0 #0000d8; }
+    h1 small{ display:none; }
+    .btns button{ padding:8px 10px; }
+  }
+  @media (pointer: coarse) and (orientation: portrait){
+    #rotateHint{ display:block; }
+  }
+  @media (pointer: coarse) and (orientation: landscape){
+    canvas#cv{ width:auto; max-width:100%; height:min(68vh, 340px); margin:0 auto; }
+  }
+  #gamewrap:fullscreen{
+    background:#000; display:flex; flex-direction:column;
+    justify-content:center; padding:8px; max-width:none;
+  }
+  #gamewrap:fullscreen canvas#cv{
+    width:auto; max-width:100%; height:min(76vh, 56vw); margin:0 auto; border-color:#000;
+  }
 </style>
 </head>
 <body>
@@ -118,11 +153,13 @@
     <button id="resetBtn">↺ Standard-Level</button>
     <button id="musicBtn">♫ Musik: an</button>
     <button id="muteBtn">🔊</button>
+    <button id="fsBtn">⛶ Vollbild</button>
   </div>
 </header>
 
 <main>
   <div id="gamewrap">
+    <div id="rotateHint">📱 Handy quer halten für das beste Spielerlebnis</div>
     <canvas id="cv" width="512" height="300" tabindex="0"></canvas>
     <div id="touch">
       <div class="tc-group">
@@ -1197,7 +1234,7 @@ const DEFAULT_ROOMS = [
 "#..*...........................#",
 "#..====...............===......#",
 "#........................*.....#",
-"####################T###########",
+"##################...T##########",
 "#...................T.#........#",
 "#..................T..#........#",
 "#.................T...#........#",
@@ -3758,6 +3795,32 @@ musicBtn.addEventListener("click", () => {
   music.on = !music.on;
   musicBtn.textContent = "♫ Musik: " + (music.on ? "an" : "aus");
 });
+
+// ---------- Vollbild (Handy) ----------
+const fsBtn = document.getElementById("fsBtn");
+const gamewrapEl = document.getElementById("gamewrap");
+if (!gamewrapEl.requestFullscreen) fsBtn.style.display = "none";
+fsBtn.addEventListener("click", () => {
+  if (document.fullscreenElement){
+    document.exitFullscreen();
+  } else {
+    gamewrapEl.requestFullscreen().then(() => {
+      try{
+        if (screen.orientation && screen.orientation.lock){
+          screen.orientation.lock("landscape").catch(()=>{});
+        }
+      }catch(e){}
+    }).catch(()=>{});
+  }
+});
+document.addEventListener("fullscreenchange", () => {
+  fsBtn.textContent = document.fullscreenElement ? "⛶ Vollbild aus" : "⛶ Vollbild";
+});
+
+// ---------- Offline-Betrieb (PWA) ----------
+if ('serviceWorker' in navigator && location.protocol === 'https:'){
+  navigator.serviceWorker.register('sw.js').catch(()=>{});
+}
 
 // ================================================================
 // START

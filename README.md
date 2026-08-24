@@ -4,6 +4,8 @@ Eine Hommage an den ZX-Spectrum-Klassiker als einzelne HTML-Datei. Einfach `inde
 
 **Online spielen:** https://choplifter.github.io/jetsetwilly/ – auch auf dem Handy: Auf Touch-Geräten erscheinen automatisch On-Screen-Tasten (◀ ▶ laufen, ● springen, ▲▼ Lianen klettern, ⏎/ESC Menü).
 
+**Als App aufs Handy:** Die Seite ist eine PWA – im Browser-Menü „Zum Startbildschirm hinzufügen" wählen, dann startet das Spiel mit eigenem Icon im Vollbild (Querformat) und läuft dank Service Worker auch offline. Alternativ gibt es den ⛶-Vollbild-Knopf direkt auf der Seite; im Hochformat erinnert ein Hinweis ans Querhalten.
+
 ## Die Geschichte
 
 Willy hat die Party des Jahrhunderts gefeiert – überall im Herrenhaus liegen Flaschen herum. Die Oma lässt ihn erst ins Schlafzimmer, wenn **alle Flaschen** eingesammelt sind. Dann darf Willy endlich ins Bett.
