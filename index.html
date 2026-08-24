@@ -1246,7 +1246,7 @@ const DEFAULT_ROOMS = [
 "...................S............",
 "###########################...##",
 ]},
-{ x:2, y:2, name:"Die Eingangshalle", color:0, guards:[10,1], ropes:[[4,0,13]],
+{ x:2, y:2, name:"Die Eingangshalle", color:0, guards:[10,1], ropes:[[24,0,13]],
   decos:[[12,1,5],[18,13,8],[5,4,6],[10,6,6],[1,14,11],[24,13,13],[12,14,16]], rows:[
 "###########################...##",
 "#..............................#",
@@ -2527,12 +2527,13 @@ function physTick(){
   if (dx !== 0){
     const y0 = Math.floor(game.py / TILE);
     const y1 = Math.floor((game.py + PH - 1) / TILE);
-    // Treppen blockieren seitlich nur in der Luft und nur als echte Flanke:
-    // Liegt die Stufenkante auf Fußhöhe oder tiefer, darf der Sprung darüber
-    // hinweg und landet normal auf der Stufe. Am Boden greift das
-    // Stufensteigen bzw. man läuft unter dem Lauf hindurch.
+    // Treppen blockieren seitlich nur beim FALLEN und nur als echte Flanke:
+    // In der Steigphase eines Sprungs fliegt Willy frei durch die Stufen
+    // (Durchspringen von unten/schräg), beim Herabfallen fängt ihn die
+    // Flanke bzw. die Stufenoberseite – kein Hindurchrutschen. Am Boden
+    // greift das Stufensteigen bzw. man läuft unter dem Lauf hindurch.
     const blocksX = (tt, ty) => SOLID(tt) ||
-      (tt === T.STAIR && !game.onGround && ty*TILE < game.py + PH - 6);
+      (tt === T.STAIR && !game.onGround && game.vy >= 0 && ty*TILE < game.py + PH - 6);
     if (dx > 0){
       const tx = Math.floor((game.px + PW) / TILE);
       for (let ty=y0; ty<=y1; ty++){
