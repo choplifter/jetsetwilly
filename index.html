@@ -1191,9 +1191,9 @@ const DEFAULT_ROOMS = [
 "#......====........====........#",
 "#..............................#",
 "#..====......====..............#",
-"#..............................#",
-"........====....................",
-".....S..........................",
+"#.........T....................#",
+".........T......................",
+".....S..T.......................",
 "###########################...##",
 ]},
 { x:2, y:2, name:"Die Eingangshalle", color:0, guards:[10,1], ropes:[[14,0,8]],
@@ -1219,14 +1219,14 @@ const DEFAULT_ROOMS = [
   decos:[[7,14,10],[1,14,3],[3,14,4],[26,5,7],[12,14,16]], rows:[
 "################################",
 "#..............................#",
-"#.....................*........#",
-"#..................======......#",
+"#.................G...*........#",
+"#.................G======......#",
 "#..............................#",
 "#..........=====......H........#",
 "#....*.........................#",
 "#...=====......................#",
 "#..................V...........#",
-"#...........====..........*....#",
+"#...........====..........*.!..#",
 "#........................=====.#",
 "#..........%%%%%....====.......#",
 "#...............V..............#",
@@ -1267,9 +1267,9 @@ const DEFAULT_ROOMS = [
 "#.................=====........#",
 "#......*.......................#",
 "#.....====...====..............#",
-"#..............................#",
-"...===.......H..................",
-"................................",
+"#....T.........................#",
+"....T........H..................",
+"...T............................",
 "################################",
 ]},
 { x:1, y:3, name:"Die Zentrale Höhle", color:0, air:true, guards:[9,14],
@@ -1348,7 +1348,7 @@ const DEFAULT_ROOMS = [
 "................................",
 "################################",
 ]},
-{ x:0, y:2, name:"Ballsaal West", color:2, guards:[4],
+{ x:0, y:2, name:"Ballsaal West", color:2, guards:[4], ropes:[[13,0,6]],
   decos:[[14,1,5],[25,3,7],[2,6,6],[28,14,11],[25,14,4],[5,13,14]], rows:[
 "################################",
 "#..............................#",
@@ -1368,7 +1368,7 @@ const DEFAULT_ROOMS = [
 "################################",
 ]},
 { x:1, y:1, name:"Der Treppenabsatz", color:5, guards:[1],
-  decos:[[19,13,8],[4,4,6],[7,7,6],[26,7,7],[2,13,17],[5,14,16]], rows:[
+  decos:[[27,13,8],[4,4,6],[7,7,6],[27,4,7],[2,13,17],[5,14,16]], rows:[
 "########################...#####",
 "#..............................#",
 "#......................*.......#",
@@ -1376,17 +1376,17 @@ const DEFAULT_ROOMS = [
 "#..............................#",
 "#..................====........#",
 "#..............................#",
-"#.............====.............#",
-"#..............H...............#",
-"#.........====.................#",
-"#....*.........................#",
-"#....====......................#",
-"#..............................#",
-"#.........====..................",
-"#...............................",
+"#.............====........T....#",
+"#..............H.........T.....#",
+"#.........====..........T......#",
+"#....*.................T.......#",
+"#....====.............T........#",
+"#....................T.........#",
+"#.........====......T...........",
+"#..................T............",
 "###############...##############",
 ]},
-{ x:1, y:0, name:"Auf dem Dach", color:6, guards:[12,6],
+{ x:1, y:0, name:"Auf dem Dach", color:6, guards:[19,6],
   decos:[[1,13,12],[28,13,12]], rows:[
 "################################",
 "#..............................#",
@@ -1593,8 +1593,10 @@ function parseAsciiRoom(def){
   return { room, start };
 }
 
+const DEFAULT_REV = 7;   // bei jeder Änderung am Standard-Level erhöhen
+
 function buildDefaultWorld(){
-  const w = { start:{rx:2,ry:1,tx:5,ty:14}, rooms:{} };
+  const w = { start:{rx:2,ry:1,tx:5,ty:14}, rooms:{}, defaultRev:DEFAULT_REV, custom:false };
   for (const def of DEFAULT_ROOMS){
     const {room, start} = parseAsciiRoom(def);
     w.rooms[roomKey(def.x,def.y)] = room;
@@ -1629,6 +1631,7 @@ const LS_KEY = "jsw-world-v2";
 const LS_KEY_OLD = "jsw-world-v1";
 let saveTimer = null;
 function scheduleSave(){
+  world.custom = true;   // vom Nutzer bearbeitet -> nie automatisch ersetzen
   clearTimeout(saveTimer);
   saveTimer = setTimeout(()=>{
     try{ localStorage.setItem(LS_KEY, JSON.stringify(world)); }catch(e){}
@@ -1642,12 +1645,18 @@ function loadWorld(){
       return names === "Der Dachboden|Der Weinkeller|Die Eingangshalle|Die Küche" ||
              names === "Das Schlafzimmer|Der Dachboden|Der Weinkeller|Die Eingangshalle|Die Küche" ||
              names === "Auf dem Dach|Ballsaal Ost|Ballsaal West|Das Badezimmer|Das Schlafzimmer|Der Dachboden|Der Kühlraum|Der Treppenabsatz|Der Weinkeller|Die Eingangshalle|Die Küche|Die Speisekammer|Unterm Dach" ||
-             names === "Auf dem Dach|Ballsaal Ost|Ballsaal West|Das Badezimmer|Das Schlafzimmer|Der Dachboden|Der Kühlraum|Der Stollen|Der Treppenabsatz|Der Weinkeller|Die Eingangshalle|Die Küche|Die Speisekammer|Die Zentrale Höhle|Unterm Dach";
+             names === "Auf dem Dach|Ballsaal Ost|Ballsaal West|Das Badezimmer|Das Schlafzimmer|Der Dachboden|Der Kühlraum|Der Stollen|Der Treppenabsatz|Der Weinkeller|Die Eingangshalle|Die Küche|Die Speisekammer|Die Zentrale Höhle|Unterm Dach" ||
+             names === "Auf dem Dach|Ballsaal Ost|Ballsaal West|Das Badezimmer|Das Schlafzimmer|Der Dachboden|Der Kühlraum|Der Ostflügel|Der Rittersaal|Der Stollen|Der Treppenabsatz|Der Weinkeller|Die Bibliothek|Die Eingangshalle|Die Küche|Die Schatzkammer|Die Speisekammer|Die Zentrale Höhle|Unterm Dach";
     };
     const raw = localStorage.getItem(LS_KEY);
     if (raw){
       const w = JSON.parse(raw);
       if (w && w.rooms && w.start){
+        // Neues Schema: unverändertes Standard-Level wird bei neuer Revision ersetzt
+        if (w.defaultRev !== undefined){
+          if (!w.custom && w.defaultRev !== DEFAULT_REV) return buildDefaultWorld();
+          return normalizeWorld(w);
+        }
         if (isOldDefault(w)) return buildDefaultWorld();
         return normalizeWorld(w);
       }
@@ -3624,6 +3633,7 @@ document.getElementById("resetBtn").addEventListener("click", () => {
   setMode("edit");
   edit.x = world.start.rx; edit.y = world.start.ry;
   refreshRoomUI(); refreshMapGrid(); scheduleSave();
+  world.custom = false;   // frisches Standard-Level darf künftig auto-aktualisiert werden
 });
 const muteBtn = document.getElementById("muteBtn");
 muteBtn.addEventListener("click", () => {
