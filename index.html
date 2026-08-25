@@ -1424,7 +1424,7 @@ const DEFAULT_ROOMS = [
 "########################...#####",
 "#..............................#",
 "#......................*.......#",
-"#..................T...====....#",
+"#..................T.======....#",
 "#.................T............#",
 "#................T.............#",
 "#...............T..............#",
@@ -1438,7 +1438,7 @@ const DEFAULT_ROOMS = [
 "#.......T.......................",
 "###############...##############",
 ]},
-{ x:1, y:0, name:"Auf dem Dach", color:6, guards:[19,6],
+{ x:1, y:0, name:"Auf dem Dach", color:6, guards:[19,6], ropes:[[4,0,13]],
   decos:[[1,13,12],[28,13,12]], rows:[
 "################################",
 "#..............................#",
@@ -1646,7 +1646,7 @@ function parseAsciiRoom(def){
   return { room, start };
 }
 
-const DEFAULT_REV = 15;  // bei jeder Änderung am Standard-Level erhöhen
+const DEFAULT_REV = 16;  // bei jeder Änderung am Standard-Level erhöhen
 const BUILD = 19;        // bei JEDER Code-Änderung erhöhen (Anzeige im Titel)
 
 function buildDefaultWorld(){
