@@ -1647,7 +1647,7 @@ function parseAsciiRoom(def){
 }
 
 const DEFAULT_REV = 16;  // bei jeder Änderung am Standard-Level erhöhen
-const BUILD = 19;        // bei JEDER Code-Änderung erhöhen (Anzeige im Titel)
+const BUILD = 20;        // bei JEDER Code-Änderung erhöhen (Anzeige im Titel)
 
 function buildDefaultWorld(){
   const w = { start:{rx:2,ry:1,tx:5,ty:14}, rooms:{}, defaultRev:DEFAULT_REV, custom:false };
@@ -2277,7 +2277,7 @@ const game = {
   crumble:{}, guards:[], won:false, minutes:420, hintTimer:0,
   air:AIR_MAX, portalCooldown:0,
   score:0, vanish:{}, rope:null, ropeCooldown:0, throwVx:0, nameStr:"",
-  switched:new Set(), stairThrough:false,
+  switched:new Set(), stairThrough:false, testRoom:null,
 };
 
 // ---------- Highscores (mit Namenseingabe wie im Original) ----------
@@ -2420,7 +2420,22 @@ function enterRoom(rx, ry, px, py){
   game.entry = { rx, ry, px, py };
 }
 
-function initGame(){
+// Sichere Standposition in einem Raum suchen (Stellfläche + Freiraum darüber)
+function findSpawn(room){
+  const frei = t => !SOLID(t) && t !== T.SPIKE;
+  for (let ty = ROWS-2; ty >= 1; ty--){
+    for (let tx = 1; tx < COLS-1; tx++){
+      const unten = room.tiles[(ty+1)*COLS + tx];
+      const traegt = SOLID(unten) || unten === T.PLAT || unten === T.STAIR;
+      if (traegt && frei(room.tiles[ty*COLS+tx]) && frei(room.tiles[(ty-1)*COLS+tx])){
+        return {tx, ty};
+      }
+    }
+  }
+  return {tx: 2, ty: ROWS-2};
+}
+
+function initGame(testRx, testRy){
   game.lives = START_LIVES;
   game.collected = new Set();
   game.state = "alive"; game.timer = 0;
@@ -2435,7 +2450,15 @@ function initGame(){
   if (!world.rooms[roomKey(s.rx,s.ry)]){
     world.rooms[roomKey(s.rx,s.ry)] = makeEmptyRoom("Startraum", 0, true);
   }
-  enterRoom(s.rx, s.ry, s.tx*TILE + (TILE-PW)/2, (s.ty+1)*TILE - PH);
+  // Testmodus aus dem Editor: im aktuell bearbeiteten Raum starten
+  game.testRoom = (testRx !== undefined && world.rooms[roomKey(testRx, testRy)])
+    ? {rx: testRx, ry: testRy} : null;
+  if (game.testRoom && !(s.rx === testRx && s.ry === testRy)){
+    const sp = findSpawn(world.rooms[roomKey(testRx, testRy)]);
+    enterRoom(testRx, testRy, sp.tx*TILE + (TILE-PW)/2, (sp.ty+1)*TILE - PH);
+  } else {
+    enterRoom(s.rx, s.ry, s.tx*TILE + (TILE-PW)/2, (s.ty+1)*TILE - PH);
+  }
 }
 
 function tileAtPlay(room, tx, ty){
@@ -3688,9 +3711,12 @@ document.getElementById("clearRoomBtn").addEventListener("click", () => {
 const editorAside = document.getElementById("editor");
 const playBtn = document.getElementById("playBtn");
 function setMode(m){
+  const prev = mode;
   mode = m;
   if (m === "play"){
-    initGame();
+    // Aus dem Editor heraus: aktuellen Raum testen statt am Weltstart zu beginnen
+    if (prev === "edit") initGame(edit.x, edit.y);
+    else initGame();
     playBtn.textContent = "◼ Editor (Esc)";
     editorAside.classList.add("disabled");
   } else if (m === "edit"){
@@ -3752,6 +3778,12 @@ window.addEventListener("keydown", e => {
   } else if (mode === "play"){
     if (e.code === "Escape"){ setMode("edit"); return; }
     if (e.code === "Enter" && (game.state === "gameover" || game.state === "won")){
+      // Im Testmodus: Enter startet denselben Testraum erneut
+      if (game.testRoom){
+        const tr = game.testRoom;
+        initGame(tr.rx, tr.ry);
+        return;
+      }
       if (scoreQualifies(game.score)){
         if (isTouchDevice){
           const n = (prompt("Neuer Highscore (" + game.score + " Punkte)! Dein Name:") || "")
