@@ -1649,7 +1649,7 @@ function parseAsciiRoom(def){
 }
 
 const DEFAULT_REV = 19;  // bei jeder Änderung am Standard-Level erhöhen
-const BUILD = 22;        // bei JEDER Code-Änderung erhöhen (Anzeige im Titel)
+const BUILD = 23;        // bei JEDER Code-Änderung erhöhen (Anzeige im Titel)
 
 function buildDefaultWorld(){
   const w = { start:{rx:2,ry:1,tx:5,ty:14}, rooms:{}, defaultRev:DEFAULT_REV, custom:false };
@@ -2282,9 +2282,7 @@ const game = {
   switched:new Set(), stairThrough:false, testRoom:null,
 };
 
-// ---------- Highscores (mit Namenseingabe wie im Original) ----------
-const HS_KEY = "jsw-hiscores-v1";
-
+// ---------- Highscores (eine Ruhmeshalle für alle: die Datenbank) ----------
 // Globale Highscores für alle Spieler (Supabase REST).
 // Zum Aktivieren Projekt-URL und anon-Key eintragen – siehe README.
 // Leer lassen = nur die lokale Bestenliste.
@@ -2325,28 +2323,16 @@ function submitGlobalScore(name, score){
     body: JSON.stringify({ name: String(name).slice(0,8), score: Math.max(1, Math.min(100000, score|0)) })
   }).then(() => refreshGlobalScores(true)).catch(()=>{});
 }
-function loadScores(){
-  try{
-    const a = JSON.parse(localStorage.getItem(HS_KEY));
-    if (Array.isArray(a) && a.length) return a.slice(0, 8);
-  }catch(e){}
-  return [
-    {name:"WILLY", score:3000}, {name:"OMA", score:2500},
-    {name:"PINGUIN", score:2000}, {name:"GEIST", score:1600},
-    {name:"MOENCH", score:1200}, {name:"SPINNE", score:800},
-    {name:"FASS", score:500}, {name:"HASE", score:200},
-  ];
-}
+// Qualifikation misst sich an den globalen Top 8; ist die Liste (noch)
+// unbekannt, zählt jede Punktzahl – die Datenbank sortiert ohnehin.
 function scoreQualifies(s){
-  const list = loadScores();
-  return s > 0 && (list.length < 8 || s > list[list.length-1].score);
+  if (s <= 0) return false;
+  const list = globalScores.list;
+  if (!list || list.length < 8) return true;
+  return s > list[list.length - 1].score;
 }
 function insertScore(name, s){
-  const list = loadScores();
-  list.push({name: name.slice(0,8), score: s});
-  list.sort((a,b) => b.score - a.score);
-  try{ localStorage.setItem(HS_KEY, JSON.stringify(list.slice(0,8))); }catch(e){}
-  submitGlobalScore(name, s);   // zusätzlich global melden (falls konfiguriert)
+  submitGlobalScore(name, s);
 }
 
 // ---------- Lianen (JSW-Seile) ----------
@@ -3131,19 +3117,19 @@ function renderTitle(){
   ctx.fillStyle = "#00d8d8";
   ctx.fillText("~ MIT LEVEL-EDITOR ~", W/2, 92);
 
-  // Wechselbild: Sprite-Parade / Ruhmeshalle (lokal) / Weltweit (falls konfiguriert)
-  const phasen = HS_API.url ? 3 : 2;
-  const phase = Math.floor(frameCount / 540) % phasen;
-  if (phase >= 1){
-    const weltweit = phase === 2;
+  // Wechselbild: Sprite-Parade / Ruhmeshalle (die globale Bestenliste)
+  if (Math.floor(frameCount / 540) % 2 === 1){
     ctx.fillStyle = BRIGHT[Math.floor(frameCount/12) % BRIGHT.length];
     ctx.font = "bold 14px Consolas, monospace";
-    ctx.fillText(weltweit ? "★ WELTWEIT ★" : "★ RUHMESHALLE ★", W/2, 110);
-    const list = weltweit ? (globalScores.list || []) : loadScores();
+    ctx.fillText("★ RUHMESHALLE ★", W/2, 110);
+    const list = globalScores.list || [];
     ctx.font = "bold 11px Consolas, monospace";
-    if (weltweit && globalScores.status !== "ok"){
+    if (globalScores.status !== "ok"){
       ctx.fillStyle = "#8888aa";
-      ctx.fillText(globalScores.status, W/2, 160);
+      ctx.fillText(globalScores.status === "aus" ? "nicht konfiguriert" : globalScores.status, W/2, 160);
+    } else if (!list.length){
+      ctx.fillStyle = "#8888aa";
+      ctx.fillText("noch keine Einträge – sei der Erste!", W/2, 160);
     }
     for (let i=0; i<Math.min(8, list.length); i++){
       const y = 132 + i*13;

@@ -59,7 +59,7 @@ Der Stollen — Die Zentrale Höhle (Mine, Manic-Miner-Regeln)
 
 ## Globale Highscores (für alle Spieler)
 
-Das Spiel kann eine weltweite Bestenliste anzeigen („★ WELTWEIT ★" im Titelbild-Wechsel) und qualifizierte Ergebnisse automatisch dorthin melden. Dafür wird ein kostenloses [Supabase](https://supabase.com)-Projekt als Speicher genutzt:
+Es gibt genau eine Ruhmeshalle – die weltweite aus der Datenbank („★ RUHMESHALLE ★" im Titelbild-Wechsel). Qualifizierte Ergebnisse (globale Top 8) werden nach der Namenseingabe automatisch dorthin gemeldet. Als Speicher dient ein kostenloses [Supabase](https://supabase.com)-Projekt:
 
 1. Auf supabase.com ein kostenloses Projekt anlegen
 2. Im SQL-Editor einmal ausführen:
@@ -78,13 +78,13 @@ create policy "eintragen" on public.highscores for insert with check (true);
 
 3. In `index.html` bei `const HS_API` die Projekt-URL und den „anon public"-Key eintragen (Project Settings → API)
 
-Ohne Konfiguration bleibt alles wie gehabt bei der lokalen Bestenliste. Hinweis: Wie bei jedem rein clientseitigen Spiel sind eingesendete Punktzahlen technisch fälschbar – für ein Hobby-Projekt üblich.
+Ohne Konfiguration zeigt die Ruhmeshalle „nicht konfiguriert". Hinweis: Wie bei jedem rein clientseitigen Spiel sind eingesendete Punktzahlen technisch fälschbar – für ein Hobby-Projekt üblich.
 
 ## Highscores & Punkte
 
 - Flasche = 100 Punkte, Portal-Sprung = 50, Sieg = 1000 + 500 je Restleben
-- Nach Game Over oder Sieg: Bei ausreichender Punktzahl folgt die **Namenseingabe** (bis 8 Zeichen, tippen + Enter) wie am Spectrum
-- Die **Ruhmeshalle** (Top 8, im Browser gespeichert) erscheint abwechselnd mit der Sprite-Parade auf dem Titelbild
+- Nach Game Over oder Sieg: Wer die globalen Top 8 erreicht, bekommt die **Namenseingabe** (bis 8 Zeichen, tippen + Enter) wie am Spectrum
+- Die **Ruhmeshalle** (weltweite Top 8) erscheint abwechselnd mit der Sprite-Parade auf dem Titelbild
 
 ## Lianen (JSW-Seile)
 
