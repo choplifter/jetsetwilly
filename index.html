@@ -41,7 +41,7 @@
   button.primary{border-color:var(--accent); color:var(--accent);}
   button.primary:hover{background:#2a2a10;}
   main{display:flex; gap:12px; flex-wrap:wrap; justify-content:center; width:100%; max-width:1150px;}
-  #gamewrap{flex:1 1 640px; min-width:320px; max-width:830px;}
+  #gamewrap{flex:1 1 640px; min-width:320px; max-width:1024px;}
   canvas#cv{
     width:100%; image-rendering:pixelated; image-rendering:crisp-edges;
     background:#000; border:3px solid var(--border); display:block;
@@ -65,10 +65,31 @@
   .tc.half{ width:52px; height:52px; font-size:18px; }
   .tc.mini{ width:46px; height:46px; border-radius:10px; font-size:13px; }
   aside#editor{
-    flex:0 0 290px; background:var(--panel); border:2px solid var(--border);
-    padding:12px; display:flex; flex-direction:column; gap:10px; align-self:flex-start;
+    position:fixed; top:64px; right:12px; width:300px;
+    max-height:calc(100vh - 80px); overflow-y:auto; z-index:50;
+    background:var(--panel); border:2px solid var(--border);
+    padding:12px; display:flex; flex-direction:column; gap:10px;
+    box-shadow:0 8px 30px rgba(0,0,0,.6);
+    scrollbar-width:thin; scrollbar-color:var(--border) #101018;
   }
-  aside#editor.disabled{opacity:.35; pointer-events:none;}
+  aside#editor::-webkit-scrollbar{ width:8px; }
+  aside#editor::-webkit-scrollbar-thumb{ background:var(--border); }
+  aside#editor.hidden{ display:none; }
+  aside#editor.collapsed{ max-height:none; overflow:visible; }
+  aside#editor.collapsed > *:not(#editorBar){ display:none; }
+  #editorBar{
+    position:sticky; top:-12px; z-index:2;
+    margin:-12px -12px 0; padding:8px 12px;
+    background:#22223a; border-bottom:2px solid var(--border);
+    display:flex; justify-content:space-between; align-items:center;
+    cursor:move; user-select:none; -webkit-user-select:none;
+  }
+  #editorBar span{ font-size:12px; letter-spacing:2px; color:var(--accent2); }
+  #editorBar button{ padding:1px 8px; font-size:12px; }
+  @media (pointer: coarse){
+    aside#editor{ position:static; width:auto; max-height:none; box-shadow:none; flex:0 0 auto; }
+    #editorBar{ cursor:default; }
+  }
   aside h2{font-size:12px; letter-spacing:2px; color:var(--accent2); border-bottom:1px solid var(--border); padding-bottom:3px;}
   #tools{display:grid; grid-template-columns:repeat(4,1fr); gap:5px;}
   .tool{
@@ -79,7 +100,7 @@
   .tool canvas{width:32px; height:32px; image-rendering:pixelated;}
   .tool:hover{border-color:#7777aa;}
   .tool.sel{border-color:var(--accent); color:var(--accent); background:#20200a;}
-  #gsprites{display:flex; gap:4px; flex-wrap:wrap;}
+  #gsprites, #dsprites{display:flex; gap:4px; flex-wrap:wrap;}
   .gsprite{
     background:#101018; border:2px solid var(--border); padding:2px; cursor:pointer;
   }
@@ -179,6 +200,11 @@
   </div>
 
   <aside id="editor">
+    <div id="editorBar">
+      <span>🛠 LEVEL-EDITOR</span>
+      <button id="collapseBtn" title="Ein-/Ausklappen">▁</button>
+    </div>
+
     <h2>KARTE (8×4 RÄUME)</h2>
     <div id="mapgrid"></div>
 
@@ -1661,7 +1687,7 @@ function parseAsciiRoom(def){
 }
 
 const DEFAULT_REV = 19;  // bei jeder Änderung am Standard-Level erhöhen
-const BUILD = 24;        // bei JEDER Code-Änderung erhöhen (Anzeige im Titel)
+const BUILD = 25;        // bei JEDER Code-Änderung erhöhen (Anzeige im Titel)
 
 function buildDefaultWorld(){
   const w = { start:{rx:2,ry:1,tx:5,ty:14}, rooms:{}, defaultRev:DEFAULT_REV, custom:false };
@@ -3900,6 +3926,49 @@ document.getElementById("clearRoomBtn").addEventListener("click", () => {
   scheduleSave();
 });
 
+// ---------- Editor als schwebendes Werkzeugfenster ----------
+const editorBar = document.getElementById("editorBar");
+const collapseBtn = document.getElementById("collapseBtn");
+const editorWin = document.getElementById("editor");
+const EDWIN_KEY = "jsw-editwin-v1";
+function saveEdWin(){
+  try{
+    localStorage.setItem(EDWIN_KEY, JSON.stringify({
+      x: editorWin.style.left || "", y: editorWin.style.top || "",
+      collapsed: editorWin.classList.contains("collapsed")
+    }));
+  }catch(e){}
+}
+try{
+  const s = JSON.parse(localStorage.getItem(EDWIN_KEY) || "{}");
+  if (s.x){ editorWin.style.left = s.x; editorWin.style.right = "auto"; }
+  if (s.y) editorWin.style.top = s.y;
+  if (s.collapsed) editorWin.classList.add("collapsed");
+}catch(e){}
+collapseBtn.addEventListener("click", () => {
+  editorWin.classList.toggle("collapsed");
+  collapseBtn.textContent = editorWin.classList.contains("collapsed") ? "▢" : "▁";
+  saveEdWin();
+});
+let edDrag = null;
+editorBar.addEventListener("pointerdown", e => {
+  if (e.target === collapseBtn) return;
+  if (matchMedia("(pointer: coarse)").matches) return;
+  const r = editorWin.getBoundingClientRect();
+  edDrag = { dx: e.clientX - r.left, dy: e.clientY - r.top };
+  editorBar.setPointerCapture(e.pointerId);
+  e.preventDefault();
+});
+editorBar.addEventListener("pointermove", e => {
+  if (!edDrag) return;
+  const x = Math.max(0, Math.min(window.innerWidth - 80, e.clientX - edDrag.dx));
+  const y = Math.max(0, Math.min(window.innerHeight - 40, e.clientY - edDrag.dy));
+  editorWin.style.left = x + "px";
+  editorWin.style.top = y + "px";
+  editorWin.style.right = "auto";
+});
+editorBar.addEventListener("pointerup", () => { if (edDrag){ edDrag = null; saveEdWin(); } });
+
 // ================================================================
 // MODUS-WECHSEL
 // ================================================================
@@ -3913,15 +3982,15 @@ function setMode(m){
     if (prev === "edit") initGame(edit.x, edit.y);
     else initGame();
     playBtn.textContent = "◼ Editor (Esc)";
-    editorAside.classList.add("disabled");
+    editorAside.classList.add("hidden");
   } else if (m === "edit"){
     playBtn.textContent = "▶ Spielen";
-    editorAside.classList.remove("disabled");
+    editorAside.classList.remove("hidden");
     if (world.rooms[roomKey(game.rx, game.ry)]){ edit.x = game.rx; edit.y = game.ry; }
     refreshRoomUI();
   } else { // title
     playBtn.textContent = "▶ Spielen";
-    editorAside.classList.add("disabled");
+    editorAside.classList.add("hidden");
     refreshGlobalScores();
   }
   refreshMapGrid();
