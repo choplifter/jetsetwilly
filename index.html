@@ -196,6 +196,7 @@
     <div class="row"><span style="font-size:11px">Farbe:</span><div id="colors"></div></div>
     <div class="row"><button id="clearRoomBtn">Raum leeren</button><span id="roomCoord" style="font-size:11px;color:#8888aa"></span></div>
     <label class="row" style="font-size:11px;cursor:pointer"><input type="checkbox" id="airChk"> Luftvorrat (Manic-Miner-Raum)</label>
+    <label class="row" style="font-size:11px;cursor:pointer"><input type="checkbox" id="nmChk"> Albtraum (Willy als fliegendes Schwein)</label>
 
     <h2>MEINE LEVEL</h2>
     <div class="row">
@@ -1222,6 +1223,16 @@ function drawBitmapFlipped(ctx, bmp, x, y, scale, color){
     }
   }
 }
+function drawBitmapVFlipped(ctx, bmp, x, y, scale, color){
+  ctx.fillStyle = color;
+  const h = bmp.length;
+  for (let r=0; r<h; r++){
+    const row = bmp[r];
+    for (let c=0; c<row.length; c++){
+      if (row[c] === '#') ctx.fillRect(x + c*scale, y + (h-1-r)*scale, scale, scale);
+    }
+  }
+}
 
 // ================================================================
 // STANDARD-LEVEL (ASCII)
@@ -1645,11 +1656,12 @@ function parseAsciiRoom(def){
   if (def.decos) room.decos = def.decos.map(d => ({tx:d[0], ty:d[1], type:d[2]}));
   if (def.ropes) room.ropes = def.ropes.map(r => ({tx:r[0], ty:r[1], len:r[2]}));
   room.air = !!def.air;
+  room.nightmare = !!def.nightmare;
   return { room, start };
 }
 
 const DEFAULT_REV = 19;  // bei jeder Änderung am Standard-Level erhöhen
-const BUILD = 23;        // bei JEDER Code-Änderung erhöhen (Anzeige im Titel)
+const BUILD = 24;        // bei JEDER Code-Änderung erhöhen (Anzeige im Titel)
 
 function buildDefaultWorld(){
   const w = { start:{rx:2,ry:1,tx:5,ty:14}, rooms:{}, defaultRev:DEFAULT_REV, custom:false };
@@ -1671,6 +1683,7 @@ function normalizeWorld(w){
     r.decos = r.decos || [];
     r.portal = r.portal || null;
     r.air = !!r.air;
+    r.nightmare = !!r.nightmare;
     r.ropes = r.ropes || [];
     r.switches = r.switches || [];
     r.name = r.name || "Raum"; r.color = r.color || 0;
@@ -1780,6 +1793,7 @@ const sndAirWarn = ()=>{ if(!sfxMuted) tone(1250, 0.05, 'square', 0.04); };
 const sndArrow   = ()=>{ if(!sfxMuted) tone(1600, 0.05, 'square', 0.035); };
 const sndSwitch  = ()=>{ sweep(500, 150, 0.12, 'square', 0.06); setTimeout(()=>sweep(700, 300, 0.1, 'square', 0.04), 100); };
 const sndStomp   = ()=>{ sweep(160, 35, 0.35, 'sawtooth', 0.08); };
+const sndFlush   = ()=>{ sweep(500, 60, 0.7, 'triangle', 0.06); setTimeout(()=>sweep(150, 700, 0.35, 'sine', 0.035), 550); };
 const sndFanfare = ()=>{
   if (sfxMuted) return;
   [64,68,71,76].forEach((m,i)=>setTimeout(()=>tone(midiFreq(m), i===3?0.5:0.14, 'square', 0.06), i*140));
@@ -1850,7 +1864,13 @@ setInterval(()=>{
   while (music.nextT < now + 0.35 && guard++ < 32){
     const [m,d] = music.cur.notes[music.idx];
     const dur = d * music.cur.tempo;
-    if (m > 0) tone(midiFreq(m), dur*0.85, 'square', 0.028, music.nextT);
+    if (m > 0){
+      tone(midiFreq(m), dur*0.85, 'square', 0.028, music.nextT);
+      // fürs Titel-Klavier merken, wann welche Taste leuchtet
+      music.lit = music.lit || [];
+      music.lit.push({m, t0: music.nextT, t1: music.nextT + dur*0.85});
+      if (music.lit.length > 40) music.lit.splice(0, music.lit.length - 40);
+    }
     music.nextT += dur;
     music.idx = (music.idx + 1) % music.cur.notes.length;
   }
@@ -2280,6 +2300,7 @@ const game = {
   air:AIR_MAX, portalCooldown:0,
   score:0, vanish:{}, rope:null, ropeCooldown:0, throwVx:0, nameStr:"",
   switched:new Set(), stairThrough:false, testRoom:null,
+  finale:0, finaleTimer:0, finaleKlo:null,
 };
 
 // ---------- Highscores (eine Ruhmeshalle für alle: die Datenbank) ----------
@@ -2511,6 +2532,7 @@ function canStand(room, px, py){
 
 function die(){
   if (game.state !== "alive") return;
+  if (game.finale) return;   // während des Finales ist Willy unverwundbar
   game.state = "dying"; game.timer = 0;
   sndDie();
 }
@@ -2521,9 +2543,25 @@ function respawn(){
   game.state = "alive"; game.vx=0; game.vy=0; game.fallen=0; game.jumping=false;
   enterRoom(e.rx, e.ry, e.px, e.py);
 }
-function winGame(){
+function finishWin(){
+  game.finale = 0;
   game.score += 1000 + Math.max(0, game.lives) * 500;
   game.state = "won"; sndFanfare();
+}
+function winGame(){
+  // Hommage-Finale: Willy rennt automatisch ins Startzimmer zum Klo
+  const s = world.start;
+  const startRoom = world.rooms[roomKey(s.rx, s.ry)];
+  const klo = startRoom && (startRoom.decos || []).find(d => d.type === 1);
+  if (klo){
+    game.finale = 1; game.finaleTimer = 0;
+    game.finaleKlo = { tx: klo.tx, ty: klo.ty };
+    const vonLinks = klo.tx >= COLS/2;
+    enterRoom(s.rx, s.ry, vonLinks ? 2 : W - PW - 2, 2*TILE);
+    game.vy = 0; game.fallen = 0;
+  } else {
+    finishWin();   // kein Klo im Startzimmer: normaler Sieg
+  }
 }
 
 // ---------- Physik ----------
@@ -2541,6 +2579,11 @@ function physTick(){
   let move = 0;
   if (keys.ArrowLeft || keys.KeyA) move -= MOVE;
   if (keys.ArrowRight || keys.KeyD) move += MOVE;
+  // Finale: Willy rennt selbstgesteuert zum Klo, Eingaben sind aus
+  if (game.finale === 1 && game.finaleKlo){
+    const ziel = game.finaleKlo.tx * TILE + 2;
+    move = game.px < ziel - 3 ? MOVE : (game.px > ziel + 3 ? -MOVE : 0);
+  }
   if (move > 0) game.facing = 1; else if (move < 0) game.facing = -1;
 
   let push = 0, mmBelt = 0;
@@ -2571,7 +2614,7 @@ function physTick(){
     game.facing = mmBelt;
   }
 
-  if ((keys.Space || keys.ArrowUp || keys.KeyW) && game.onGround){
+  if ((keys.Space || keys.ArrowUp || keys.KeyW) && game.onGround && !game.finale){
     game.vy = JUMP; game.onGround = false; game.fallen = 0; game.jumping = true;
   }
   // Sprung-Sound: Tonhöhe folgt der Kurve (wie im Original)
@@ -2700,7 +2743,7 @@ function physTick(){
   if (!curRoom) { die(); return; }
 
   // Liane greifen (automatisch bei Berührung, wie im Original)
-  if (!game.rope && game.ropeCooldown <= 0) tryGrabRope(curRoom);
+  if (!game.rope && game.ropeCooldown <= 0 && !game.finale) tryGrabRope(curRoom);
 
   // Stacheln
   {
@@ -2773,7 +2816,7 @@ function physTick(){
 
   // Portal-Teleport (Paare, freigeschaltet mit den Flaschen des Raums)
   if (game.portalCooldown > 0) game.portalCooldown--;
-  if (curRoom.portal && game.portalCooldown <= 0){
+  if (curRoom.portal && game.portalCooldown <= 0 && !game.finale){
     const p = curRoom.portal;
     const bx = p.tx*TILE, by = p.ty*TILE;
     if (game.px + PW > bx+6 && game.px < bx+26 &&
@@ -2899,6 +2942,17 @@ function physTick(){
     }
   }
 
+  // Finale: am Klo angekommen? (Notfall-Timeout, falls der Weg blockiert ist)
+  if (game.finale === 1 && game.finaleKlo){
+    game.finaleTimer++;
+    const ziel = game.finaleKlo.tx * TILE + 2;
+    if ((Math.abs(game.px - ziel) <= 3 && game.onGround) || game.finaleTimer > 600){
+      game.px = ziel;
+      game.finale = 2; game.finaleTimer = 0;
+      sndFlush();
+    }
+  }
+
   // Uhr (Deko, wie das Original ab 7:00 Uhr morgens)
   if (frameCount % 90 === 0){
     game.minutes = (game.minutes + 1) % 1440;
@@ -2909,7 +2963,13 @@ function tick(){
   frameCount++;
   if (mode !== "play") return;
   if (game.state === "alive"){
-    physTick();
+    if (game.finale === 2){
+      // Kopf im Klo: kurz strampeln lassen, dann der eigentliche Sieg
+      game.finaleTimer++;
+      if (game.finaleTimer > 150) finishWin();
+    } else {
+      physTick();
+    }
   } else if (game.state === "dying"){
     game.timer++;
     if (game.timer > 50) respawn();
@@ -3040,8 +3100,10 @@ function renderHUD(room){
     ctx.textAlign = "center";
     ctx.fillText(clockStr(), W/2 + 40, H+24);
     ctx.textAlign = "left";
+    // Rest-Leben marschieren auf der Stelle und schimmern in Farben
     for (let i=0; i<Math.max(0,game.lives); i++){
-      drawBitmap(ctx, WILLY_F[0], W - 22 - i*15, H + 22, 1, "#ffffff");
+      const f = WILLY_F[WILLY_CYCLE[Math.floor(frameCount/6 + i*2) % 4]];
+      drawBitmap(ctx, f, W - 22 - i*15, H + 22, 1, BRIGHT[(Math.floor(frameCount/12) + i) % BRIGHT.length]);
     }
     // LUFT-Leiste im Manic-Miner-Stil (nur in Luft-Räumen)
     if (room && room.air){
@@ -3159,10 +3221,8 @@ function renderTitle(){
     const ox = W - px + 60 + GUARD_SPRITES.length*46 + 20;
     if (ox > -40 && ox < W+40) drawBitmap(ctx, OMA_F[Math.floor(frameCount/12)%2], ox, paradeY+2, 2, "#ffffff");
 
-    // Flaschenreihe
-    for (let i=0; i<7; i++){
-      drawBottle(ctx, W/2 - 70 + i*22, 110, frameCount, i);
-    }
+    // Klavier: Tasten leuchten im Takt der Titelmusik
+    drawPiano(W/2, 102);
   }
 
   // Aufforderungen
@@ -3192,6 +3252,30 @@ function renderTitle(){
   ctx.fillText(SCROLL_TEXT, sx + tw + W, H+16);
   ctx.textAlign = "left";
 }
+// Klaviertastatur (2 Oktaven C3..B4), Tasten leuchten zur laufenden Musik
+function drawPiano(cx, cy){
+  const lo = 48, hi = 71;
+  const isBlack = m => [1,3,6,8,10].includes(m % 12);
+  const now = audioCtx ? audioCtx.currentTime : -1;
+  const lit = m => (music.lit || []).some(n => n.m === m && now >= n.t0 && now <= n.t1);
+  const whiteX = {};
+  let wx = 0;
+  for (let m = lo; m <= hi; m++) if (!isBlack(m)){ whiteX[m] = wx; wx += 12; }
+  const x0 = cx - wx/2;
+  ctx.fillStyle = "#404040";
+  ctx.fillRect(x0-2, cy-3, wx+4, 32);
+  for (let m = lo; m <= hi; m++){
+    if (isBlack(m)) continue;
+    ctx.fillStyle = lit(m) ? "#ffff00" : "#ffffff";
+    ctx.fillRect(x0 + whiteX[m], cy, 11, 26);
+  }
+  for (let m = lo; m <= hi; m++){
+    if (!isBlack(m)) continue;
+    ctx.fillStyle = lit(m) ? "#ff00ff" : "#101018";
+    ctx.fillRect(x0 + whiteX[m-1] + 8, cy, 7, 15);
+  }
+}
+
 function renderWillyAt(x, y, facing){
   const f = WILLY_F[WILLY_CYCLE[Math.floor(frameCount/5) % 4]];
   if (facing>=0) drawBitmap(ctx, f, x, y, 2, "#ffffff");
@@ -3225,7 +3309,20 @@ function render(){
     for (const g of game.guards) renderGuard(g);
 
     if (game.state === "alive"){
-      renderWilly(game.px, game.py, game.facing, game.walkFrame, false);
+      if (game.finale === 2 && game.finaleKlo){
+        // Willy kopfüber im Klo, Beine strampeln
+        const f = WILLY_F[(Math.floor(frameCount/6) % 2) ? 1 : 2];
+        drawBitmapVFlipped(ctx, f, game.finaleKlo.tx*TILE - 8, game.finaleKlo.ty*TILE - 20, 2, "#ffffff");
+      } else if (room && room.nightmare){
+        // Albtraum-Raum: Willy als fliegendes Schwein
+        const f = GUARD_SPRITES[7].frames[Math.floor(frameCount/8) % 2];
+        const dx = Math.round(game.px) + Math.floor(PW/2) - 16;
+        const dy = Math.round(game.py) + PH - 32;
+        if (game.facing >= 0) drawBitmap(ctx, f, dx, dy, 2, "#ff00ff");
+        else drawBitmapFlipped(ctx, f, dx, dy, 2, "#ff00ff");
+      } else {
+        renderWilly(game.px, game.py, game.facing, game.walkFrame, false);
+      }
     } else if (game.state === "dying"){
       if (Math.floor(game.timer/3) % 2 === 0){
         renderWilly(game.px, game.py, game.facing, game.timer, false, BRIGHT[game.timer % BRIGHT.length]);
@@ -3239,7 +3336,7 @@ function render(){
       ctx.fillText("OMA: \"ERST ALLE FLASCHEN AUFSAMMELN!\"", W/2, 20);
       ctx.textAlign = "left";
     }
-    if (game.won && game.state === "alive"){
+    if (game.won && game.state === "alive" && !game.finale){
       ctx.fillStyle = "rgba(0,0,0,0.6)";
       ctx.fillRect(0, 4, W, 20);
       ctx.textAlign = "center";
@@ -3670,12 +3767,19 @@ function refreshRoomUI(){
   roomCoordSpan.textContent = "Raum " + (edit.x+1) + "/" + (edit.y+1) +
     (outdated ? " · Standard-Level veraltet – ↺ lädt V" + DEFAULT_REV : "");
   airChk.checked = !!(room && room.air);
+  nmChk.checked = !!(room && room.nightmare);
   [...colorsDiv.children].forEach((el,i)=>el.classList.toggle("sel", room && room.color===i));
 }
 const airChk = document.getElementById("airChk");
 airChk.addEventListener("change", () => {
   const room = curEditRoom(true);
   room.air = airChk.checked;
+  scheduleSave();
+});
+const nmChk = document.getElementById("nmChk");
+nmChk.addEventListener("change", () => {
+  const room = curEditRoom(true);
+  room.nightmare = nmChk.checked;
   scheduleSave();
 });
 
@@ -3755,6 +3859,7 @@ function worldToSource(){
     const guards = gsorted.filter(g=>g.axis!=='a').map(g=>g.sprite||0);
     head += ", guards:[" + guards.join(",") + "]";
     if (room.air) head += ", air:true";
+    if (room.nightmare) head += ", nightmare:true";
     if ((room.ropes||[]).length) head += ",\n  ropes:[" + room.ropes.map(r=>"["+r.tx+","+r.ty+","+r.len+"]").join(",") + "]";
     if ((room.decos||[]).length) head += ",\n  decos:[" + room.decos.map(d=>"["+d.tx+","+d.ty+","+d.type+"]").join(",") + "]";
     head += ", rows:[";
