@@ -220,7 +220,7 @@
     <h2>RAUM</h2>
     <div class="row"><input id="roomName" maxlength="28" title="Raumname"></div>
     <div class="row"><span style="font-size:11px">Farbe:</span><div id="colors"></div></div>
-    <div class="row"><button id="clearRoomBtn">Raum leeren</button><span id="roomCoord" style="font-size:11px;color:#8888aa"></span></div>
+    <div class="row"><button id="clearRoomBtn">Raum leeren</button><button id="delRoomBtn">Raum löschen</button><span id="roomCoord" style="font-size:11px;color:#8888aa"></span></div>
     <label class="row" style="font-size:11px;cursor:pointer"><input type="checkbox" id="airChk"> Luftvorrat (Manic-Miner-Raum)</label>
     <label class="row" style="font-size:11px;cursor:pointer"><input type="checkbox" id="nmChk"> Albtraum (Willy als fliegendes Schwein)</label>
 
@@ -1779,7 +1779,7 @@ function parseAsciiRoom(def){
 }
 
 const DEFAULT_REV = 22;  // bei jeder Änderung am Standard-Level erhöhen
-const BUILD = 26;        // bei JEDER Code-Änderung erhöhen (Anzeige im Titel)
+const BUILD = 27;        // bei JEDER Code-Änderung erhöhen (Anzeige im Titel)
 
 function buildDefaultWorld(){
   const w = { start:{rx:2,ry:1,tx:5,ty:14}, rooms:{}, defaultRev:DEFAULT_REV, custom:false };
@@ -4023,6 +4023,19 @@ document.getElementById("clearRoomBtn").addEventListener("click", () => {
   room.tiles = fresh.tiles; room.items = []; room.guardians = [];
   room.granny = null; room.bed = null; room.decos = [];
   scheduleSave();
+});
+document.getElementById("delRoomBtn").addEventListener("click", () => {
+  const k = roomKey(edit.x, edit.y);
+  const room = world.rooms[k];
+  if (!room){ alert("Hier ist kein Raum."); return; }
+  if (world.start.rx === edit.x && world.start.ry === edit.y){
+    alert("Dieser Raum enthält den Startpunkt. Setze den Start (Werkzeug 0) zuerst in einen anderen Raum.");
+    return;
+  }
+  if (!confirm('Raum "' + room.name + '" endgültig aus der Welt löschen?')) return;
+  delete world.rooms[k];
+  scheduleSave();
+  refreshRoomUI(); refreshMapGrid();
 });
 
 // ---------- Editor als schwebendes Werkzeugfenster ----------
