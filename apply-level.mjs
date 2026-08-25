@@ -23,7 +23,7 @@ if (!block.startsWith("const DEFAULT_ROOMS")){
 // Kartenzeilen validieren (jede muss exakt 32 Zeichen haben)
 let rows = 0, fehler = 0;
 for (const line of block.split(/\r?\n/)){
-  const m = line.trim().match(/^"([#.=<>%^*SHVOBFPATG!|()~]+)",$/);
+  const m = line.trim().match(/^"([#.=<>%^*SHVOBFPATGW!|()~]+)",$/);
   if (m){
     rows++;
     if (m[1].length !== 32){ console.error("Zeile mit Länge " + m[1].length + ": " + m[1]); fehler++; }

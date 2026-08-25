@@ -211,6 +211,7 @@
     <p class="hint">
       <b>Linksklick</b> malen · <b>Rechtsklick</b> löschen · Werkzeuge: <b>1–9, 0, R, O, B, D, F, N, P, L, Q, E, V, J</b><br>
       <b>Pfeile (N)</b> schießen periodisch quer durchs Bild – linke Hälfte platziert = fliegt nach rechts, rechte = nach links.
+      <b>Läufer (G)</b> laufen am Boden, fallen an Kanten hinunter und laufen weiter – zu hohe Stürze überleben sie nicht.
       <b>Treppen (T)</b> steigt Willy beim Laufen automatisch hinauf. Der <b>Hebel (U)</b> öffnet alle <b>Gitter (I)</b> seines Raums – Baustein für Rätsel.<br>
       <b>Deko</b> ist reine Kulisse. <b>Portale</b> teleportieren paarweise (frei, wenn die Flaschen
       des Raums gesammelt sind). <b>Wächter↓</b> stürzt wie ein Skylab ab, der <b>Strahl</b> saugt
@@ -1286,7 +1287,7 @@ const DEFAULT_ROOMS = [
 "................................",
 "####################...#########",
 ]},
-{ x:4, y:2, name:"Die Speisekammer", color:5, guards:[15,5],
+{ x:4, y:2, name:"Die Speisekammer", color:5, guards:[6,15,5],
   decos:[[26,13,9],[2,13,9],[5,14,3]], rows:[
 "#####...########################",
 "#..............................#",
@@ -1297,7 +1298,7 @@ const DEFAULT_ROOMS = [
 "#..............................#",
 "#....====...........====.......#",
 "#..............................#",
-"#.........====......H..........#",
+"#.....W...====......H..........#",
 "#..............................#",
 "#....====.......====...........#",
 "#..............................#",
@@ -1628,6 +1629,7 @@ function parseAsciiRoom(def){
       else if (c==='H') room.guardians.push({tx:x,ty:y,axis:'h',sprite:0});
       else if (c==='V') room.guardians.push({tx:x,ty:y,axis:'v',sprite:0});
       else if (c==='F') room.guardians.push({tx:x,ty:y,axis:'f',sprite:8});
+      else if (c==='W') room.guardians.push({tx:x,ty:y,axis:'w',sprite:0});
       else if (c==='A') room.guardians.push({tx:x,ty:y,axis:'a',sprite:ARROW_IDX});
       else if (c==='O') room.granny = {tx:x,ty:y};
       else if (c==='B') room.bed = {tx:x,ty:y};
@@ -1646,8 +1648,8 @@ function parseAsciiRoom(def){
   return { room, start };
 }
 
-const DEFAULT_REV = 16;  // bei jeder Änderung am Standard-Level erhöhen
-const BUILD = 20;        // bei JEDER Code-Änderung erhöhen (Anzeige im Titel)
+const DEFAULT_REV = 17;  // bei jeder Änderung am Standard-Level erhöhen
+const BUILD = 21;        // bei JEDER Code-Änderung erhöhen (Anzeige im Titel)
 
 function buildDefaultWorld(){
   const w = { start:{rx:2,ry:1,tx:5,ty:14}, rooms:{}, defaultRev:DEFAULT_REV, custom:false };
@@ -2395,8 +2397,8 @@ function initGuards(room){
       x: Math.min(g.tx, COLS-2)*TILE, y: Math.min(g.ty, ROWS-2)*TILE,
       axis: g.axis, sprite: g.sprite || 0,
       dir: (i%2===0?1:-1),
-      speed: g.axis==='h' ? 1.0 : (g.axis==='f' ? 2.2 : 1.2),
-      state: 'fall', timer: 0,
+      speed: g.axis==='h' ? 1.0 : (g.axis==='f' ? 2.2 : (g.axis==='w' ? 0.9 : 1.2)),
+      state: g.axis==='w' ? 'walk' : 'fall', timer: 0, vy: 0, fall: 0,
       color: BRIGHT[(i + (g.axis==='v'?2:0)) % BRIGHT.length],
     };
     if (g.axis === 'a'){
@@ -2783,6 +2785,47 @@ function physTick(){
       if (g.dir < 0 && g.x < -GS - 260) g.x = W + 260;
       const nowInX = g.x + GS > 0 && g.x < W;
       if (!prevInX && nowInX) sndArrow();
+    } else if (g.axis === 'w'){
+      // Läufer: läuft am Boden, fällt an Kanten hinunter und läuft weiter –
+      // oder zerschellt, wenn der Sturz höher ist als Willys Falllimit.
+      if (g.state === 'crash'){
+        g.timer++;
+        if (g.timer > 40) g.state = 'dead';
+      } else if (g.state !== 'dead'){
+        g.vy = Math.min(g.vy + GRAV, MAXFALL);
+        let ny = g.y + g.vy;
+        const tx0 = Math.floor(g.x/TILE), tx1 = Math.floor((g.x+GS-1)/TILE);
+        const edge = Math.floor((ny + GS) / TILE);
+        let landed = false;
+        if (edge >= 0) for (let tx=tx0; tx<=tx1; tx++){
+          const t = tileAtPlay(curRoom, tx, edge);
+          if (SOLID(t) || t === T.PLAT || t === T.STAIR){
+            ny = edge*TILE - GS; landed = true; break;
+          }
+        }
+        if (ny > H){
+          g.state = 'dead';                       // aus dem Raum gefallen
+        } else if (landed){
+          g.y = ny;
+          if (g.fall > FALL_LIMIT){
+            g.state = 'crash'; g.timer = 0; sndCrash();
+          } else {
+            g.vy = 0; g.fall = 0;
+            const nx = g.x + g.dir * g.speed;
+            const ex = g.dir > 0 ? Math.floor((nx+GS)/TILE) : Math.floor(nx/TILE);
+            let blocked = nx < 0 || nx > W - GS;
+            const by0 = Math.floor(g.y/TILE), by1 = Math.floor((g.y+GS-1)/TILE);
+            if (!blocked) for (let ty2=by0; ty2<=by1; ty2++){
+              const t = tileAtPlay(curRoom, ex, ty2);
+              if (SOLID(t) || t === T.STAIR){ blocked = true; break; }
+            }
+            if (blocked) g.dir = -g.dir; else g.x = nx;
+          }
+        } else {
+          g.y = ny;
+          g.fall += g.vy;
+        }
+      }
     } else if (g.axis === 'f'){
       // Skylab: fällt, zerschellt, taucht versetzt wieder auf (Manic Miner)
       if (g.state === 'crash'){
@@ -2816,8 +2859,9 @@ function physTick(){
       }
       if (blocked) g.dir = -g.dir; else g.y = ny;
     }
-    // Zerschelltes Skylab ist nach kurzer Zeit harmlos
-    if (g.axis === 'f' && g.state === 'crash' && g.timer > 10) continue;
+    // Zerschellte/tote Wächter sind harmlos
+    if (g.state === 'dead') continue;
+    if ((g.axis === 'f' || g.axis === 'w') && g.state === 'crash' && g.timer > 10) continue;
     // Pfeile haben eine schmale Trefferzone (nur der Schaft)
     const gy0 = g.axis === 'a' ? g.y + 10 : g.y + 4;
     const gy1 = g.axis === 'a' ? g.y + 22 : g.y + GS - 4;
@@ -2897,7 +2941,15 @@ function renderWilly(x, y, facing, walkFrame, ghost, colorOverride){
 }
 
 function renderGuard(g){
+  if (g.state === 'dead') return;
   const spr = GUARD_SPRITES[g.sprite % GUARD_SPRITES.length];
+  // Zerschellender Läufer: buntes Todesblinken, dann verschwunden
+  if (g.axis === 'w' && g.state === 'crash'){
+    if (Math.floor(g.timer/3) % 2 === 0){
+      drawBitmap(ctx, spr.frames[1], Math.round(g.x), Math.round(g.y), 2, BRIGHT[g.timer % BRIGHT.length]);
+    }
+    return;
+  }
   // Spinne hängt am Faden
   if (g.sprite === 9 && g.axis === 'v'){
     ctx.fillStyle = "#aaaaaa";
@@ -2906,7 +2958,7 @@ function renderGuard(g){
   let f;
   if (g.axis === 'f') f = spr.frames[g.state === 'crash' ? 1 : 0];
   else f = spr.frames[Math.floor(frameCount/8) % 2];
-  const flip = g.dir < 0 && (g.axis === 'h' || g.axis === 'a');
+  const flip = g.dir < 0 && (g.axis === 'h' || g.axis === 'a' || g.axis === 'w');
   if (!flip) drawBitmap(ctx, f, Math.round(g.x), Math.round(g.y), 2, g.color);
   else drawBitmapFlipped(ctx, f, Math.round(g.x), Math.round(g.y), 2, g.color);
 }
@@ -3262,6 +3314,7 @@ const TOOLS = [
   { id:"guardh", label:"Wächter↔", key:"Digit8" },
   { id:"guardv", label:"Wächter↕", key:"Digit9" },
   { id:"guardf", label:"Wächter↓", key:"KeyF" },
+  { id:"guardw", label:"Läufer",   key:"KeyG" },
   { id:"arrow",  label:"Pfeil",    key:"KeyN" },
   { id:"oma",    label:"Oma",      key:"KeyO" },
   { id:"bed",    label:"Bett",     key:"KeyB" },
@@ -3306,7 +3359,7 @@ function renderEditorOverlay(room){
     drawBitmap(ctx, spr.frames[0], g.tx*TILE, g.ty*TILE, 2, BRIGHT[(i + (g.axis==='v'?2:0)) % BRIGHT.length]);
     ctx.fillStyle = "#ffffff";
     ctx.font = "9px Consolas, monospace";
-    ctx.fillText(g.axis==='h' ? "↔" : (g.axis==='v' ? "↕" : (g.axis==='f' ? "↓" : "→")), g.tx*TILE+12, g.ty*TILE-9);
+    ctx.fillText(g.axis==='h' ? "↔" : (g.axis==='v' ? "↕" : (g.axis==='f' ? "↓" : (g.axis==='w' ? "⤓" : "→"))), g.tx*TILE+12, g.ty*TILE-9);
   });
 
   if (world.start.rx === edit.x && world.start.ry === edit.y){
@@ -3361,10 +3414,11 @@ function applyTool(tx, ty, erase){
     if (!room.items.some(it => it.tx===tx && it.ty===ty)){
       room.items.push({tx,ty});
     }
-  } else if (tool.id === "guardh" || tool.id === "guardv" || tool.id === "guardf" || tool.id === "arrow"){
+  } else if (tool.id === "guardh" || tool.id === "guardv" || tool.id === "guardf" || tool.id === "guardw" || tool.id === "arrow"){
     const gx = Math.min(tx, COLS-2), gy = Math.min(ty, ROWS-2);
     room.guardians = room.guardians.filter(g => !(g.tx===gx && g.ty===gy));
-    const axis = tool.id === "guardh" ? 'h' : (tool.id === "guardv" ? 'v' : (tool.id === "guardf" ? 'f' : 'a'));
+    const axis = tool.id === "guardh" ? 'h' : (tool.id === "guardv" ? 'v' :
+                 (tool.id === "guardf" ? 'f' : (tool.id === "guardw" ? 'w' : 'a')));
     const sprite = tool.id === "arrow" ? ARROW_IDX : edit.guardSprite;
     room.guardians.push({tx:gx, ty:gy, axis, sprite});
   } else if (tool.id === "portal"){
@@ -3446,6 +3500,8 @@ function buildTools(){
       drawBitmap(pctx, GUARD_SPRITES[4].frames[0], 0, 0, 1, "#00ffff");
     } else if (tool.id === "guardf"){
       drawBitmap(pctx, GUARD_SPRITES[8].frames[0], 0, 0, 1, "#ffff00");
+    } else if (tool.id === "guardw"){
+      drawBitmap(pctx, GUARD_SPRITES[6].frames[0], 0, 0, 1, "#00ff00");
     } else if (tool.id === "arrow"){
       drawBitmap(pctx, GUARD_SPRITES[ARROW_IDX].frames[0], 0, 0, 1, "#ffffff");
     } else if (tool.id === "portal"){
@@ -3655,7 +3711,7 @@ function worldToSource(){
     const put = (tx,ty,ch) => { if (ty>=0 && ty<ROWS && tx>=0 && tx<COLS) grid[ty][tx] = ch; };
     for (const it of room.items) put(it.tx, it.ty, '*');
     const gsorted = [...room.guardians].sort((a,b)=> (a.ty-b.ty) || (a.tx-b.tx));
-    for (const g of gsorted) put(g.tx, g.ty, g.axis==='h'?'H':g.axis==='v'?'V':g.axis==='f'?'F':'A');
+    for (const g of gsorted) put(g.tx, g.ty, g.axis==='h'?'H':g.axis==='v'?'V':g.axis==='f'?'F':g.axis==='w'?'W':'A');
     for (const sw of (room.switches||[])) put(sw.tx, sw.ty, '!');
     if (room.portal) put(room.portal.tx, room.portal.ty, 'P');
     if (room.bed) put(room.bed.tx, room.bed.ty, 'B');
