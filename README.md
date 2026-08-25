@@ -57,6 +57,29 @@ Der Stollen — Die Zentrale Höhle (Mine, Manic-Miner-Regeln)
 - **Treppen (T)**: Steinstufen, die Willy beim Laufen automatisch hinaufsteigt – kein Springen nötig. Große Treppenaufgänge im Rittersaal und Ostflügel.
 - **Hebel & Gitter (U / I)**: Ein berührter Hebel öffnet alle Gittertüren seines Raums (einmal pro Partie). In der Schatzkammer bewacht ein Ritter hinter Gittern drei Flaschen – der Hebel sitzt am anderen Ende des Raums, und das geöffnete Gitter lässt auch den Ritter frei …
 
+## Globale Highscores (für alle Spieler)
+
+Das Spiel kann eine weltweite Bestenliste anzeigen („★ WELTWEIT ★" im Titelbild-Wechsel) und qualifizierte Ergebnisse automatisch dorthin melden. Dafür wird ein kostenloses [Supabase](https://supabase.com)-Projekt als Speicher genutzt:
+
+1. Auf supabase.com ein kostenloses Projekt anlegen
+2. Im SQL-Editor einmal ausführen:
+
+```sql
+create table public.highscores (
+  id bigint generated always as identity primary key,
+  name text not null check (char_length(name) between 1 and 8),
+  score int not null check (score between 1 and 100000),
+  created_at timestamptz not null default now()
+);
+alter table public.highscores enable row level security;
+create policy "lesen" on public.highscores for select using (true);
+create policy "eintragen" on public.highscores for insert with check (true);
+```
+
+3. In `index.html` bei `const HS_API` die Projekt-URL und den „anon public"-Key eintragen (Project Settings → API)
+
+Ohne Konfiguration bleibt alles wie gehabt bei der lokalen Bestenliste. Hinweis: Wie bei jedem rein clientseitigen Spiel sind eingesendete Punktzahlen technisch fälschbar – für ein Hobby-Projekt üblich.
+
 ## Highscores & Punkte
 
 - Flasche = 100 Punkte, Portal-Sprung = 50, Sieg = 1000 + 500 je Restleben

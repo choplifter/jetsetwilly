@@ -1649,7 +1649,7 @@ function parseAsciiRoom(def){
 }
 
 const DEFAULT_REV = 18;  // bei jeder Änderung am Standard-Level erhöhen
-const BUILD = 21;        // bei JEDER Code-Änderung erhöhen (Anzeige im Titel)
+const BUILD = 22;        // bei JEDER Code-Änderung erhöhen (Anzeige im Titel)
 
 function buildDefaultWorld(){
   const w = { start:{rx:2,ry:1,tx:5,ty:14}, rooms:{}, defaultRev:DEFAULT_REV, custom:false };
@@ -2284,6 +2284,47 @@ const game = {
 
 // ---------- Highscores (mit Namenseingabe wie im Original) ----------
 const HS_KEY = "jsw-hiscores-v1";
+
+// Globale Highscores für alle Spieler (Supabase REST).
+// Zum Aktivieren Projekt-URL und anon-Key eintragen – siehe README.
+// Leer lassen = nur die lokale Bestenliste.
+const HS_API = {
+  url: "",   // z.B. "https://xyzabc.supabase.co"
+  key: "",   // der "anon public" API-Key des Projekts
+};
+const globalScores = { list: null, ts: 0, status: "aus" };
+
+async function refreshGlobalScores(force){
+  if (!HS_API.url) return;
+  const now = Date.now();
+  if (!force && now - globalScores.ts < 60000) return;
+  globalScores.ts = now;
+  if (!globalScores.list) globalScores.status = "lädt …";
+  try{
+    const r = await fetch(HS_API.url + "/rest/v1/highscores?select=name,score&order=score.desc&limit=8", {
+      headers: { apikey: HS_API.key, Authorization: "Bearer " + HS_API.key }
+    });
+    if (!r.ok) throw new Error(r.status);
+    globalScores.list = await r.json();
+    globalScores.status = "ok";
+  }catch(e){
+    globalScores.status = "keine Verbindung";
+  }
+}
+
+function submitGlobalScore(name, score){
+  if (!HS_API.url) return;
+  fetch(HS_API.url + "/rest/v1/highscores", {
+    method: "POST",
+    headers: {
+      apikey: HS_API.key,
+      Authorization: "Bearer " + HS_API.key,
+      "Content-Type": "application/json",
+      Prefer: "return=minimal"
+    },
+    body: JSON.stringify({ name: String(name).slice(0,8), score: Math.max(1, Math.min(100000, score|0)) })
+  }).then(() => refreshGlobalScores(true)).catch(()=>{});
+}
 function loadScores(){
   try{
     const a = JSON.parse(localStorage.getItem(HS_KEY));
@@ -2305,6 +2346,7 @@ function insertScore(name, s){
   list.push({name: name.slice(0,8), score: s});
   list.sort((a,b) => b.score - a.score);
   try{ localStorage.setItem(HS_KEY, JSON.stringify(list.slice(0,8))); }catch(e){}
+  submitGlobalScore(name, s);   // zusätzlich global melden (falls konfiguriert)
 }
 
 // ---------- Lianen (JSW-Seile) ----------
@@ -3089,20 +3131,26 @@ function renderTitle(){
   ctx.fillStyle = "#00d8d8";
   ctx.fillText("~ MIT LEVEL-EDITOR ~", W/2, 92);
 
-  // Wechselbild: Sprite-Parade / Ruhmeshalle
-  if (Math.floor(frameCount / 540) % 2 === 1){
-    // Ruhmeshalle
+  // Wechselbild: Sprite-Parade / Ruhmeshalle (lokal) / Weltweit (falls konfiguriert)
+  const phasen = HS_API.url ? 3 : 2;
+  const phase = Math.floor(frameCount / 540) % phasen;
+  if (phase >= 1){
+    const weltweit = phase === 2;
     ctx.fillStyle = BRIGHT[Math.floor(frameCount/12) % BRIGHT.length];
     ctx.font = "bold 14px Consolas, monospace";
-    ctx.fillText("★ RUHMESHALLE ★", W/2, 110);
-    const list = loadScores();
+    ctx.fillText(weltweit ? "★ WELTWEIT ★" : "★ RUHMESHALLE ★", W/2, 110);
+    const list = weltweit ? (globalScores.list || []) : loadScores();
     ctx.font = "bold 11px Consolas, monospace";
-    for (let i=0; i<list.length; i++){
+    if (weltweit && globalScores.status !== "ok"){
+      ctx.fillStyle = "#8888aa";
+      ctx.fillText(globalScores.status, W/2, 160);
+    }
+    for (let i=0; i<Math.min(8, list.length); i++){
       const y = 132 + i*13;
       ctx.fillStyle = i===0 ? "#ffff00" : "#d8d8d8";
       ctx.textAlign = "left";
       ctx.fillText((i+1) + ".", W/2 - 100, y);
-      ctx.fillText(list[i].name, W/2 - 72, y);
+      ctx.fillText(String(list[i].name), W/2 - 72, y);
       ctx.textAlign = "right";
       ctx.fillText(String(list[i].score).padStart(5,"0"), W/2 + 100, y);
     }
@@ -3783,6 +3831,7 @@ function setMode(m){
   } else { // title
     playBtn.textContent = "▶ Spielen";
     editorAside.classList.add("disabled");
+    refreshGlobalScores();
   }
   refreshMapGrid();
   cv.focus();
