@@ -78,6 +78,14 @@ Schwingende grüne Seile: Berühren = festhalten, **↑/↓** = klettern, **Spru
 
 Senkrechte Verbindungen laufen durch Lücken in Decke/Boden (hochspringen bzw. hinunterfallen – unter jedem Schacht wartet eine Plattform). Alle Sprünge sind auf Sprunghöhe (2 Kacheln) und Sprungweite (max. 3 Kacheln Lücke) ausgelegt.
 
+## Eigene Level ins HTML übernehmen
+
+Mit dem Editor gebaute Welten lassen sich als **eingebautes Standard-Level** in die `index.html` übernehmen:
+
+1. Im Editor unter „Meine Level" auf **„⬇ Quelltext"** klicken → lädt `default-rooms.txt` (der komplette `DEFAULT_ROOMS`-Block im Quellcode-Format)
+2. Im Projektordner ausführen: `node apply-level.mjs default-rooms.txt`
+3. Das Skript validiert alle Kartenzeilen, ersetzt den Block zwischen den Markern in `index.html` und erhöht `DEFAULT_REV` automatisch – dann committen/pushen
+
 ## Speichern & Teilen
 
 - Automatisches Speichern im Browser (localStorage)

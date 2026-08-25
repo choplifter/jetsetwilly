@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="de">
 <head>
 <meta charset="utf-8">
@@ -10,7 +10,7 @@
 <meta name="apple-mobile-web-app-title" content="Jet Set Willy">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
-<title>Jet Set Willy â€“ Mein Herrenhaus</title>
+<title>Jet Set Willy – Mein Herrenhaus</title>
 <style>
   :root{
     --bg:#101018; --panel:#181826; --border:#33334d;
@@ -47,7 +47,7 @@
     background:#000; border:3px solid var(--border); display:block;
     outline:none; touch-action:none;
   }
-  /* Touch-Steuerung: erscheint nur auf GerÃ¤ten mit Touch-Bedienung */
+  /* Touch-Steuerung: erscheint nur auf Geräten mit Touch-Bedienung */
   #touch{
     display:none; justify-content:space-between; align-items:flex-end;
     gap:10px; margin-top:10px; user-select:none; -webkit-user-select:none;
@@ -105,7 +105,7 @@
   }
   .mapcell.has{background:#22224a;}
   .mapcell.cur{border-color:var(--accent); box-shadow:0 0 0 1px var(--accent);}
-  .mapcell.start::after{content:"â–¶"; color:#00d800; position:absolute; font-size:8px; right:1px; bottom:0;}
+  .mapcell.start::after{content:"▶"; color:#00d800; position:absolute; font-size:8px; right:1px; bottom:0;}
   .hint{font-size:11px; color:#8888aa; line-height:1.5;}
   .hint b{color:var(--ink);}
   footer{max-width:1150px; width:100%; font-size:11px; color:#666688; line-height:1.6;}
@@ -146,46 +146,46 @@
 <header>
   <h1>JET SET WILLY<small>MIT LEVEL-EDITOR</small></h1>
   <div class="btns">
-    <button id="titleBtn">â˜… Titelbild</button>
-    <button id="playBtn" class="primary">â–¶ Spielen <kbd>Tab</kbd></button>
-    <button id="exportBtn">â¬‡ Export</button>
-    <button id="importBtn">â¬† Import</button>
-    <button id="resetBtn">â†º Standard-Level</button>
-    <button id="musicBtn">â™« Musik: an</button>
-    <button id="muteBtn">ðŸ”Š</button>
-    <button id="fsBtn">â›¶ Vollbild</button>
+    <button id="titleBtn">★ Titelbild</button>
+    <button id="playBtn" class="primary">▶ Spielen <kbd>Tab</kbd></button>
+    <button id="exportBtn">⬇ Export</button>
+    <button id="importBtn">⬆ Import</button>
+    <button id="resetBtn">↺ Standard-Level</button>
+    <button id="musicBtn">♫ Musik: an</button>
+    <button id="muteBtn">🔊</button>
+    <button id="fsBtn">⛶ Vollbild</button>
   </div>
 </header>
 
 <main>
   <div id="gamewrap">
-    <div id="rotateHint">ðŸ“± Handy quer halten fÃ¼r das beste Spielerlebnis</div>
+    <div id="rotateHint">📱 Handy quer halten für das beste Spielerlebnis</div>
     <canvas id="cv" width="512" height="300" tabindex="0"></canvas>
     <div id="touch">
       <div class="tc-group">
-        <button class="tc" data-key="ArrowLeft">â—€</button>
-        <button class="tc" data-key="ArrowRight">â–¶</button>
+        <button class="tc" data-key="ArrowLeft">◀</button>
+        <button class="tc" data-key="ArrowRight">▶</button>
       </div>
       <div class="tc-group">
-        <button class="tc mini" data-key="Enter">âŽ</button>
+        <button class="tc mini" data-key="Enter">⏎</button>
         <button class="tc mini" data-key="Escape">ESC</button>
       </div>
       <div class="tc-group">
-        <button class="tc half" data-key="ArrowUp">â–²</button>
-        <button class="tc half" data-key="ArrowDown">â–¼</button>
-        <button class="tc jump" data-key="Space">â—</button>
+        <button class="tc half" data-key="ArrowUp">▲</button>
+        <button class="tc half" data-key="ArrowDown">▼</button>
+        <button class="tc jump" data-key="Space">●</button>
       </div>
     </div>
   </div>
 
   <aside id="editor">
-    <h2>KARTE (8Ã—4 RÃ„UME)</h2>
+    <h2>KARTE (8×4 RÄUME)</h2>
     <div id="mapgrid"></div>
 
     <h2>WERKZEUGE</h2>
     <div id="tools"></div>
 
-    <h2>WÃ„CHTER-SPRITE</h2>
+    <h2>WÄCHTER-SPRITE</h2>
     <div id="gsprites"></div>
 
     <h2>DEKO-TYP</h2>
@@ -199,33 +199,34 @@
 
     <h2>MEINE LEVEL</h2>
     <div class="row">
-      <button id="saveWorldBtn">ðŸ’¾ Sichernâ€¦</button>
+      <button id="saveWorldBtn">💾 Sichern…</button>
       <select id="savesSel"></select>
     </div>
     <div class="row">
       <button id="loadWorldBtn">Laden</button>
-      <button id="delSaveBtn">LÃ¶schen</button>
+      <button id="delSaveBtn">Löschen</button>
+      <button id="srcBtn" title="Welt als DEFAULT_ROOMS-Quelltext für index.html exportieren">⬇ Quelltext</button>
     </div>
 
     <p class="hint">
-      <b>Linksklick</b> malen Â· <b>Rechtsklick</b> lÃ¶schen Â· Werkzeuge: <b>1â€“9, 0, R, O, B, D, F, N, P, L, Q, E, V, J</b><br>
-      <b>Pfeile (N)</b> schieÃŸen periodisch quer durchs Bild â€“ linke HÃ¤lfte platziert = fliegt nach rechts, rechte = nach links.
-      <b>Treppen (T)</b> steigt Willy beim Laufen automatisch hinauf. Der <b>Hebel (U)</b> Ã¶ffnet alle <b>Gitter (I)</b> seines Raums â€“ Baustein fÃ¼r RÃ¤tsel.<br>
+      <b>Linksklick</b> malen · <b>Rechtsklick</b> löschen · Werkzeuge: <b>1–9, 0, R, O, B, D, F, N, P, L, Q, E, V, J</b><br>
+      <b>Pfeile (N)</b> schießen periodisch quer durchs Bild – linke Hälfte platziert = fliegt nach rechts, rechte = nach links.
+      <b>Treppen (T)</b> steigt Willy beim Laufen automatisch hinauf. Der <b>Hebel (U)</b> öffnet alle <b>Gitter (I)</b> seines Raums – Baustein für Rätsel.<br>
       <b>Deko</b> ist reine Kulisse. <b>Portale</b> teleportieren paarweise (frei, wenn die Flaschen
-      des Raums gesammelt sind). <b>WÃ¤chterâ†“</b> stÃ¼rzt wie ein Skylab ab, der <b>Strahl</b> saugt
-      Luft ab. <b>MM-BÃ¤nder</b> zwingen die Laufrichtung, <b>SchwundbÃ¶den</b> verschwinden dauerhaft.
-      <b>Lianen</b> schwingen: greifen durch BerÃ¼hren, â†‘â†“ klettern, Sprungtaste = abspringen.<br>
+      des Raums gesammelt sind). <b>Wächter↓</b> stürzt wie ein Skylab ab, der <b>Strahl</b> saugt
+      Luft ab. <b>MM-Bänder</b> zwingen die Laufrichtung, <b>Schwundböden</b> verschwinden dauerhaft.
+      <b>Lianen</b> schwingen: greifen durch Berühren, ↑↓ klettern, Sprungtaste = abspringen.<br>
       Die <b>Oma</b> versperrt den Weg, bis alle Flaschen gesammelt sind. Das <b>Bett</b> ist das Spielziel.
-      VerlÃ¤ÃŸt Willy den Bildrand, landet er im Nachbarraum â€“ Ã¶ffne dafÃ¼r die WÃ¤nde!
+      Verläßt Willy den Bildrand, landet er im Nachbarraum – öffne dafür die Wände!
     </p>
   </aside>
 </main>
 
 <footer>
-  <b>Steuerung:</b> <kbd>â†</kbd><kbd>â†’</kbd> oder <kbd>A</kbd><kbd>D</kbd> laufen Â· <kbd>Leertaste</kbd>/<kbd>â†‘</kbd>/<kbd>W</kbd> springen Â· <kbd>Tab</kbd> Spiel/Editor Â· <kbd>Esc</kbd> zurÃ¼ck Â· <kbd>M</kbd> Musik an/aus Â· <kbd>Enter</kbd> Neustart<br>
-  <b>Ziel:</b> Willy hat die Party des Jahrhunderts gefeiert â€“ sammle alle herumliegenden Flaschen ein!
-  Erst dann lÃ¤sst dich die Oma ins Schlafzimmer, wo das Bett auf dich wartet.
-  <b>Musik:</b> Titelmusik ist wie im Original Beethovens Mondscheinsonate (gemeinfrei); im Spiel lÃ¤uft Griegs â€žIn der Halle des BergkÃ¶nigs" (die Original-Spielmelodie ist noch urheberrechtlich geschÃ¼tzt).
+  <b>Steuerung:</b> <kbd>←</kbd><kbd>→</kbd> oder <kbd>A</kbd><kbd>D</kbd> laufen · <kbd>Leertaste</kbd>/<kbd>↑</kbd>/<kbd>W</kbd> springen · <kbd>Tab</kbd> Spiel/Editor · <kbd>Esc</kbd> zurück · <kbd>M</kbd> Musik an/aus · <kbd>Enter</kbd> Neustart<br>
+  <b>Ziel:</b> Willy hat die Party des Jahrhunderts gefeiert – sammle alle herumliegenden Flaschen ein!
+  Erst dann lässt dich die Oma ins Schlafzimmer, wo das Bett auf dich wartet.
+  <b>Musik:</b> Titelmusik ist wie im Original Beethovens Mondscheinsonate (gemeinfrei); im Spiel läuft Griegs „In der Halle des Bergkönigs" (die Original-Spielmelodie ist noch urheberrechtlich geschützt).
 </footer>
 
 <input type="file" id="fileInput" accept=".json,application/json" style="display:none">
@@ -233,7 +234,7 @@
 <script>
 "use strict";
 /* ================================================================
-   JET SET WILLY â€“ Hommage mit Level-Editor
+   JET SET WILLY – Hommage mit Level-Editor
    Titelscreen, Beeper-Musik, 16x16-Sprites, Flaschen, Oma & Bett
    ================================================================ */
 
@@ -245,14 +246,14 @@ const MAPW = 8, MAPH = 4;
 const STEP = 1000 / 60;
 
 const PW = 12, PH = 28;
-const GS = 32;                                  // WÃ¤chter/Oma: 32x32 (2x2 Kacheln)
+const GS = 32;                                  // Wächter/Oma: 32x32 (2x2 Kacheln)
 const MOVE = 2.0, GRAV = 0.4, JUMP = -6.4, MAXFALL = 7;
 const CONVEYOR_PUSH = 1.0;
 const FALL_LIMIT = 116;
 const CRUMBLE_TIME = 40;
 const START_LIVES = 5;
-const AIR_MAX = 2100;           // Luftvorrat in Frames (Manic-Miner-RÃ¤ume)
-const VANISH_TIME = 24;         // Schwundboden: Frames bis endgÃ¼ltig weg
+const AIR_MAX = 2100;           // Luftvorrat in Frames (Manic-Miner-Räume)
+const VANISH_TIME = 24;         // Schwundboden: Frames bis endgültig weg
 
 const T = { EMPTY:0, WALL:1, PLAT:2, SPIKE:3, CONVL:4, CONVR:5, CRUMBLE:6, SOLAR:7,
             CONVML:8, CONVMR:9, VANISH:10, STAIR:11, GATE:12 };
@@ -331,7 +332,7 @@ const WILLY_F = [
 ];
 const WILLY_CYCLE = [0,2,1,2];
 
-// Oma (HaushÃ¤lterin), 2 Frames (Zeigefinger-Wackeln)
+// Oma (Haushälterin), 2 Frames (Zeigefinger-Wackeln)
 const OMA_F = [
 [
 "................",
@@ -371,9 +372,9 @@ const OMA_F = [
 ],
 ];
 
-// WÃ¤chter-Sprites: 6 Typen Ã  2 Frames
+// Wächter-Sprites: 6 Typen à 2 Frames
 const GUARD_SPRITES = [
-{ name:"SÃ¤ge", frames:[
+{ name:"Säge", frames:[
 [
 "................",
 ".......##.......",
@@ -410,7 +411,7 @@ const GUARD_SPRITES = [
 "................",
 "................",
 ]]},
-{ name:"MÃ¶nch", frames:[
+{ name:"Mönch", frames:[
 [
 "................",
 ".....######.....",
@@ -891,7 +892,7 @@ const GUARD_SPRITES = [
 "................",
 "................",
 ]]},
-{ name:"KÃ¤nguru", frames:[
+{ name:"Känguru", frames:[
 [
 "................",
 "................",
@@ -1223,9 +1224,10 @@ function drawBitmapFlipped(ctx, bmp, x, y, scale, color){
 
 // ================================================================
 // STANDARD-LEVEL (ASCII)
-// # Mauer  = Plattform  ^ Stacheln  < > Band  % BrÃ¶ckelstein
-// * Flasche  H/V WÃ¤chter  O Oma  B Bett  S Start  . leer
+// # Mauer  = Plattform  ^ Stacheln  < > Band  % Bröckelstein
+// * Flasche  H/V Wächter  O Oma  B Bett  S Start  . leer
 // ================================================================
+// --- DEFAULT_ROOMS_START --- (Block wird von apply-level.mjs ersetzt)
 const DEFAULT_ROOMS = [
 { x:2, y:1, name:"Das Badezimmer", color:0, guards:[],
   decos:[[21,14,0],[25,14,1]], rows:[
@@ -1265,7 +1267,7 @@ const DEFAULT_ROOMS = [
 "......T.........................",
 "###....#########################",
 ]},
-{ x:3, y:2, name:"Die KÃ¼che", color:3, guards:[16,0,4],
+{ x:3, y:2, name:"Die Küche", color:3, guards:[16,0,4],
   decos:[[7,14,10],[1,14,3],[3,14,4],[26,5,7],[12,14,16],[23,14,10],[26,14,4]], rows:[
 "################################",
 "#..............................#",
@@ -1322,7 +1324,7 @@ const DEFAULT_ROOMS = [
 "...T............................",
 "################################",
 ]},
-{ x:1, y:3, name:"Die Zentrale HÃ¶hle", color:0, air:true, guards:[9,14],
+{ x:1, y:3, name:"Die Zentrale Höhle", color:0, air:true, guards:[9,14],
   decos:[], rows:[
 "################################",
 "#..............................#",
@@ -1360,7 +1362,7 @@ const DEFAULT_ROOMS = [
 "#...............................",
 "################################",
 ]},
-{ x:3, y:3, name:"Der KÃ¼hlraum", color:4, guards:[11,2],
+{ x:3, y:3, name:"Der Kühlraum", color:4, guards:[11,2],
   decos:[[2,14,3],[6,6,6],[5,14,11]], rows:[
 "####################...#########",
 "#..............................#",
@@ -1422,7 +1424,7 @@ const DEFAULT_ROOMS = [
 "########################...#####",
 "#..............................#",
 "#......................*.......#",
-"#..................T.======....#",
+"#..................T...====....#",
 "#.................T............#",
 "#................T.............#",
 "#...............T..............#",
@@ -1436,7 +1438,7 @@ const DEFAULT_ROOMS = [
 "#.......T.......................",
 "###############...##############",
 ]},
-{ x:1, y:0, name:"Auf dem Dach", color:6, guards:[19,6],ropes:[[4,0,13]],
+{ x:1, y:0, name:"Auf dem Dach", color:6, guards:[19,6],
   decos:[[1,13,12],[28,13,12]], rows:[
 "################################",
 "#..............................#",
@@ -1531,7 +1533,7 @@ const DEFAULT_ROOMS = [
 "#...................T..........#",
 "#####...########################",
 ]},
-{ x:5, y:2, name:"Der OstflÃ¼gel", color:0, guards:[20], ropes:[[4,0,13]],
+{ x:5, y:2, name:"Der Ostflügel", color:0, guards:[20], ropes:[[4,0,13]],
   decos:[[8,13,17],[26,13,8],[12,14,16]], rows:[
 "########################...#####",
 "#..............................#",
@@ -1589,6 +1591,7 @@ const DEFAULT_ROOMS = [
 "################################",
 ]},
 ];
+// --- DEFAULT_ROOMS_END ---
 
 // ---------- Welt ----------
 let world = null;
@@ -1643,8 +1646,8 @@ function parseAsciiRoom(def){
   return { room, start };
 }
 
-const DEFAULT_REV = 15;  // bei jeder Ã„nderung am Standard-Level erhÃ¶hen
-const BUILD = 18;        // bei JEDER Code-Ã„nderung erhÃ¶hen (Anzeige im Titel)
+const DEFAULT_REV = 15;  // bei jeder Änderung am Standard-Level erhöhen
+const BUILD = 19;        // bei JEDER Code-Änderung erhöhen (Anzeige im Titel)
 
 function buildDefaultWorld(){
   const w = { start:{rx:2,ry:1,tx:5,ty:14}, rooms:{}, defaultRev:DEFAULT_REV, custom:false };
@@ -1690,20 +1693,20 @@ function scheduleSave(){
 }
 function loadWorld(){
   try{
-    // UnverÃ¤ndertes Standard-Level einer frÃ¼heren Version? Dann das neue Haus laden.
+    // Unverändertes Standard-Level einer früheren Version? Dann das neue Haus laden.
     const isOldDefault = w => {
       const names = Object.values(w.rooms).map(r=>r.name).sort().join("|");
-      return names === "Der Dachboden|Der Weinkeller|Die Eingangshalle|Die KÃ¼che" ||
-             names === "Das Schlafzimmer|Der Dachboden|Der Weinkeller|Die Eingangshalle|Die KÃ¼che" ||
-             names === "Auf dem Dach|Ballsaal Ost|Ballsaal West|Das Badezimmer|Das Schlafzimmer|Der Dachboden|Der KÃ¼hlraum|Der Treppenabsatz|Der Weinkeller|Die Eingangshalle|Die KÃ¼che|Die Speisekammer|Unterm Dach" ||
-             names === "Auf dem Dach|Ballsaal Ost|Ballsaal West|Das Badezimmer|Das Schlafzimmer|Der Dachboden|Der KÃ¼hlraum|Der Stollen|Der Treppenabsatz|Der Weinkeller|Die Eingangshalle|Die KÃ¼che|Die Speisekammer|Die Zentrale HÃ¶hle|Unterm Dach" ||
-             names === "Auf dem Dach|Ballsaal Ost|Ballsaal West|Das Badezimmer|Das Schlafzimmer|Der Dachboden|Der KÃ¼hlraum|Der OstflÃ¼gel|Der Rittersaal|Der Stollen|Der Treppenabsatz|Der Weinkeller|Die Bibliothek|Die Eingangshalle|Die KÃ¼che|Die Schatzkammer|Die Speisekammer|Die Zentrale HÃ¶hle|Unterm Dach";
+      return names === "Der Dachboden|Der Weinkeller|Die Eingangshalle|Die Küche" ||
+             names === "Das Schlafzimmer|Der Dachboden|Der Weinkeller|Die Eingangshalle|Die Küche" ||
+             names === "Auf dem Dach|Ballsaal Ost|Ballsaal West|Das Badezimmer|Das Schlafzimmer|Der Dachboden|Der Kühlraum|Der Treppenabsatz|Der Weinkeller|Die Eingangshalle|Die Küche|Die Speisekammer|Unterm Dach" ||
+             names === "Auf dem Dach|Ballsaal Ost|Ballsaal West|Das Badezimmer|Das Schlafzimmer|Der Dachboden|Der Kühlraum|Der Stollen|Der Treppenabsatz|Der Weinkeller|Die Eingangshalle|Die Küche|Die Speisekammer|Die Zentrale Höhle|Unterm Dach" ||
+             names === "Auf dem Dach|Ballsaal Ost|Ballsaal West|Das Badezimmer|Das Schlafzimmer|Der Dachboden|Der Kühlraum|Der Ostflügel|Der Rittersaal|Der Stollen|Der Treppenabsatz|Der Weinkeller|Die Bibliothek|Die Eingangshalle|Die Küche|Die Schatzkammer|Die Speisekammer|Die Zentrale Höhle|Unterm Dach";
     };
     const raw = localStorage.getItem(LS_KEY);
     if (raw){
       const w = JSON.parse(raw);
       if (w && w.rooms && w.start){
-        // Neues Schema: unverÃ¤ndertes Standard-Level wird bei neuer Revision ersetzt
+        // Neues Schema: unverändertes Standard-Level wird bei neuer Revision ersetzt
         if (w.defaultRev !== undefined){
           if (!w.custom && w.defaultRev !== DEFAULT_REV) return buildDefaultWorld();
           return normalizeWorld(w);
@@ -1761,7 +1764,7 @@ function sweep(f0, f1, dur, type='square', vol=0.04){
   o.connect(g); g.connect(audioCtx.destination);
   o.start(t); o.stop(t+dur+0.02);
 }
-// Sprung-Jaulen wie im Original: kleine Blips, TonhÃ¶he folgt der Sprungkurve
+// Sprung-Jaulen wie im Original: kleine Blips, Tonhöhe folgt der Sprungkurve
 function jumpBlip(vy){
   if (sfxMuted) return;
   tone(360 - vy*34, 0.035, 'square', 0.025);
@@ -1784,19 +1787,19 @@ const sndFanfare = ()=>{
 function tri(a,b,c,times){ const r=[]; for(let i=0;i<times;i++) r.push([a,1],[b,1],[c,1]); return r; }
 const N = (m,d=1)=>[m,d];
 
-// Titelmusik: Mondscheinsonate (Beethoven, gemeinfrei) â€“ wie im Original.
+// Titelmusik: Mondscheinsonate (Beethoven, gemeinfrei) – wie im Original.
 // Vier Strophen: Arpeggien / Melodie obenauf / Moll-Wanderung / Kadenz
 const SEQ_TITLE = { tempo:0.20, notes:[
-  // 1. Strophe: die berÃ¼hmten Triolen-Arpeggien
+  // 1. Strophe: die berühmten Triolen-Arpeggien
   ...tri(56,61,64,8),
   ...tri(57,61,64,2), ...tri(57,62,66,2),
   ...tri(56,60,66,2), ...tri(56,61,64,2),
-  // 2. Strophe: Melodiestimme (Gis) Ã¼ber den Arpeggien
+  // 2. Strophe: Melodiestimme (Gis) über den Arpeggien
   ...tri(68,61,64,3), N(68,3),
   ...tri(68,61,64,3), N(68,3),
   ...tri(69,62,66,3), N(69,3),
   ...tri(68,60,66,3), N(68,3),
-  // 3. Strophe: Wanderung Ã¼ber fis-Moll und die Dominante
+  // 3. Strophe: Wanderung über fis-Moll und die Dominante
   ...tri(54,57,61,2), ...tri(54,57,62,2),
   ...tri(56,60,63,2), ...tri(56,60,66,2),
   ...tri(54,59,64,2), ...tri(54,60,66,2),
@@ -1806,7 +1809,7 @@ const SEQ_TITLE = { tempo:0.20, notes:[
   N(49,2), N(56,2), N(61,6),
 ]};
 
-// Spielmusik: In der Halle des BergkÃ¶nigs (Grieg, gemeinfrei)
+// Spielmusik: In der Halle des Bergkönigs (Grieg, gemeinfrei)
 // Vier Strophen: tiefe Lage / mittlere Lage / hohe Lage / Finale mit Stichen
 const MK_P0 = [N(52),N(54),N(55),N(57),N(59),N(55),N(59)];
 const MK_P1 = [N(64),N(66),N(67),N(69),N(71),N(67),N(71)];
@@ -1821,7 +1824,7 @@ const SEQ_GAME = { tempo:0.135, notes:[
   // 3. Strophe: hohe Lage
   ...MK_P2, N(82),N(78),N(82,2), N(81),N(77),N(81,2),
   ...MK_P2, N(83,2),N(79,1),N(76,1),N(76,4),
-  // 4. Strophe: Finale â€“ doppelter Durchlauf und Schluss-Stiche
+  // 4. Strophe: Finale – doppelter Durchlauf und Schluss-Stiche
   ...MK_P2, ...MK_P2,
   N(76,1),N(79,1),N(83,1),N(88,2), N(76,1),N(79,1),N(83,1),N(88,2),
   N(88,1),N(87,1),N(88,1),N(83,1), N(79,1),N(76,1),N(71,1),N(67,1),
@@ -1829,7 +1832,7 @@ const SEQ_GAME = { tempo:0.135, notes:[
 ]};
 
 const music = { on:true, cur:null, idx:0, nextT:0 };
-// Welche Musik gehÃ¶rt zum aktuellen Zustand? (Titelmusik NUR im Titel)
+// Welche Musik gehört zum aktuellen Zustand? (Titelmusik NUR im Titel)
 function desiredSeq(){
   if (mode === "title") return SEQ_TITLE;
   if (mode === "play" && (game.state === "alive" || game.state === "dying")) return SEQ_GAME;
@@ -1854,20 +1857,20 @@ setInterval(()=>{
 // ================================================================
 // KACHELN & OBJEKTE ZEICHNEN
 // ================================================================
-// Feine Treppe: zwei zierliche 8px-Tritte pro Kachel mit StÃ¼tzen.
+// Feine Treppe: zwei zierliche 8px-Tritte pro Kachel mit Stützen.
 // ascLeft = Lauf steigt nach links an (gespiegelt)
 function drawFineStair(ctx, px, py, ascLeft, u){
   u = u || 1;
-  const lo = ascLeft ? 8*u : 0;        // x-Versatz der unteren TrittflÃ¤che
-  const hi = ascLeft ? 0 : 8*u;        // x-Versatz der oberen TrittflÃ¤che
+  const lo = ascLeft ? 8*u : 0;        // x-Versatz der unteren Trittfläche
+  const hi = ascLeft ? 0 : 8*u;        // x-Versatz der oberen Trittfläche
   ctx.fillStyle = '#b0b0b0';
-  ctx.fillRect(px + lo, py + 8*u, 8*u, 3*u);   // untere TrittflÃ¤che
-  ctx.fillRect(px + hi, py, 8*u, 3*u);         // obere TrittflÃ¤che
+  ctx.fillRect(px + lo, py + 8*u, 8*u, 3*u);   // untere Trittfläche
+  ctx.fillRect(px + hi, py, 8*u, 3*u);         // obere Trittfläche
   ctx.fillStyle = '#e0e0e0';
   ctx.fillRect(px + lo, py + 8*u, 8*u, u);     // Trittkanten
   ctx.fillRect(px + hi, py, 8*u, u);
   ctx.fillStyle = '#404040';
-  ctx.fillRect(px + lo + (ascLeft ? u : 5*u), py + 11*u, 2*u, 5*u);  // StÃ¼tzen
+  ctx.fillRect(px + lo + (ascLeft ? u : 5*u), py + 11*u, 2*u, 5*u);  // Stützen
   ctx.fillRect(px + hi + (ascLeft ? u : 5*u), py + 3*u, 2*u, 5*u);
 }
 
@@ -1916,8 +1919,8 @@ function drawTile(ctx, t, px, py, s, wallCol, frame, crumbleDecay){
     case T.CONVR:
     case T.CONVML:
     case T.CONVMR: {
-      // FÃ¶rderband im Manic-Miner-Stil: zwei gegenlÃ¤ufig laufende
-      // Kettenreihen zwischen hellen Schienen â€“ das typische "Mahlen"
+      // Förderband im Manic-Miner-Stil: zwei gegenläufig laufende
+      // Kettenreihen zwischen hellen Schienen – das typische "Mahlen"
       const dir = (t===T.CONVR || t===T.CONVMR) ? 1 : -1;
       const mm = (t===T.CONVML || t===T.CONVMR);
       const base = mm ? '#500000' : '#003800';
@@ -1936,7 +1939,7 @@ function drawTile(ctx, t, px, py, s, wallCol, frame, crumbleDecay){
       chain(py, dir);                       // obere Kette: Laufrichtung
       ctx.fillStyle = rail;
       ctx.fillRect(px, py + 2*u, s, u);
-      chain(py + 3*u, -dir);                // untere Kette: gegenlÃ¤ufig
+      chain(py + 3*u, -dir);                // untere Kette: gegenläufig
       ctx.fillStyle = rail;
       ctx.fillRect(px, py + 5*u, s, u);
       ctx.fillStyle = '#000000';
@@ -1945,12 +1948,12 @@ function drawTile(ctx, t, px, py, s, wallCol, frame, crumbleDecay){
     }
     case T.CRUMBLE: {
       // "Sumpf": moddrig gepunkteter Boden, der beim Betreten
-      // unregelmÃ¤ÃŸig von oben wegbrÃ¶ckelt (ausgefranste Kante)
+      // unregelmäßig von oben wegbröckelt (ausgefranste Kante)
       const decay = crumbleDecay || 0;
       const gone = Math.min(1, decay / CRUMBLE_TIME);
       const goneRows = Math.floor(gone * 13);
       const seed = Math.floor(px / 16) * 7;
-      // SÃ¤ulen mit leicht unterschiedlicher AbbruchhÃ¶he
+      // Säulen mit leicht unterschiedlicher Abbruchhöhe
       for (let c2 = 0; c2 < 8; c2++){
         const jag = goneRows > 0 ? ((c2 * 5 + seed) % 3) : 0;
         const topRow = Math.min(16, goneRows + jag);
@@ -1996,7 +1999,7 @@ function drawTile(ctx, t, px, py, s, wallCol, frame, crumbleDecay){
       break;
     }
     case T.GATE: {
-      // GittertÃ¼r: verschwindet, wenn der Hebel im Raum umgelegt wird
+      // Gittertür: verschwindet, wenn der Hebel im Raum umgelegt wird
       ctx.fillStyle = '#555577';
       ctx.fillRect(px, py, s, 2*u);
       ctx.fillRect(px, py + 7*u, s, 2*u);
@@ -2064,12 +2067,12 @@ function drawSwitch(ctx, tx, ty, on){
 function drawGranny(ctx, tx, ty, frame){
   const f = OMA_F[Math.floor(frame/16) % 2];
   drawBitmap(ctx, f, tx*TILE, ty*TILE, 2, '#ffffff');
-  // SchÃ¼rze
+  // Schürze
   ctx.fillStyle = '#00d8d8';
   ctx.fillRect(tx*TILE+8, ty*TILE+22, 16, 6);
 }
 
-// ---------- Deko (reine Hintergrund-MÃ¶bel, keine Kollision) ----------
+// ---------- Deko (reine Hintergrund-Möbel, keine Kollision) ----------
 const DECO_TYPES = [
   {name:"Badewanne",    w:2, h:1},
   {name:"Klo",          w:1, h:1},
@@ -2085,10 +2088,10 @@ const DECO_TYPES = [
   {name:"Pflanze",      w:1, h:1},
   {name:"Schornstein",  w:1, h:2},
   {name:"Kamin",        w:2, h:2},
-  {name:"BÃ¼cherregal",  w:2, h:2},
+  {name:"Bücherregal",  w:2, h:2},
   {name:"Spiegel",      w:1, h:2},
   {name:"Teppich",      w:2, h:1},
-  {name:"RÃ¼stung",      w:1, h:2},
+  {name:"Rüstung",      w:1, h:2},
   {name:"Stehlampe",    w:1, h:2},
 ];
 function drawDeco(ctx, d, frame){
@@ -2210,7 +2213,7 @@ function drawDeco(ctx, d, frame){
       ctx.fillStyle = "#500000"; ctx.fillRect(x+9, y+29, 14, 3);
       break;
     }
-    case 14: { // BÃ¼cherregal
+    case 14: { // Bücherregal
       ctx.fillStyle = "#8a5020"; ctx.fillRect(x+1, y+1, 30, 30);
       const bookCols = ["#d80000","#0000d8","#00b800","#d8d800","#d800d8","#00c0c0"];
       for (let s2=0; s2<3; s2++){
@@ -2236,7 +2239,7 @@ function drawDeco(ctx, d, frame){
       for (let i=0; i<4; i++) ctx.fillRect(x+4+i*8, y+12, 2, 2);
       break;
     }
-    case 17: { // RitterrÃ¼stung
+    case 17: { // Ritterrüstung
       ctx.fillStyle = "#aaaaaa";
       ctx.fillRect(x+4, y+2, 8, 6);
       ctx.fillRect(x+3, y+9, 10, 10);
@@ -2357,7 +2360,7 @@ function ropeMoveTick(room){
   }
 }
 
-// Alle Portale der Welt in fester Reihenfolge (Paare: 0â†”1, 2â†”3, â€¦)
+// Alle Portale der Welt in fester Reihenfolge (Paare: 0↔1, 2↔3, …)
 function worldPortals(){
   const list = [];
   for (let y=0; y<MAPH; y++) for (let x=0; x<MAPW; x++){
@@ -2397,7 +2400,7 @@ function initGuards(room){
       color: BRIGHT[(i + (g.axis==='v'?2:0)) % BRIGHT.length],
     };
     if (g.axis === 'a'){
-      // Pfeil: fliegt von auÃŸen quer durchs Bild, Richtung je nach Platzierungsseite
+      // Pfeil: fliegt von außen quer durchs Bild, Richtung je nach Platzierungsseite
       gd.dir = g.tx < COLS/2 ? 1 : -1;
       gd.x = gd.dir > 0 ? -GS - (i%3)*160 : W + (i%3)*160;
       gd.sprite = ARROW_IDX;
@@ -2518,7 +2521,7 @@ function physTick(){
   if ((keys.Space || keys.ArrowUp || keys.KeyW) && game.onGround){
     game.vy = JUMP; game.onGround = false; game.fallen = 0; game.jumping = true;
   }
-  // Sprung-Sound: TonhÃ¶he folgt der Kurve (wie im Original)
+  // Sprung-Sound: Tonhöhe folgt der Kurve (wie im Original)
   if (game.jumping && frameCount % 2 === 0) jumpBlip(game.vy);
 
   // Horizontal (inkl. Restschwung nach Lianen-Absprung)
@@ -2530,7 +2533,7 @@ function physTick(){
     const y0 = Math.floor(game.py / TILE);
     const y1 = Math.floor((game.py + PH - 1) / TILE);
     // Treppen sind in der Luft frei durchspringbar (wie Plattformen);
-    // nur echte WÃ¤nde blockieren seitlich.
+    // nur echte Wände blockieren seitlich.
     if (dx > 0){
       const tx = Math.floor((game.px + PW) / TILE);
       for (let ty=y0; ty<=y1; ty++){
@@ -2542,11 +2545,11 @@ function physTick(){
         if (SOLID(tileAtPlay(room, tx, ty))){ game.px = (tx+1)*TILE + 0.01; break; }
       }
     }
-    // Feine Treppe: beim Laufen automatisch die nÃ¤chste Stufe hinaufsteigen.
-    // Wichtig: Willy wird mit MindestÃ¼berlappung auf der Stufe verankert,
-    // damit die StandflÃ¤che im nÃ¤chsten Frame wirklich trÃ¤gt.
+    // Feine Treppe: beim Laufen automatisch die nächste Stufe hinaufsteigen.
+    // Wichtig: Willy wird mit Mindestüberlappung auf der Stufe verankert,
+    // damit die Standfläche im nächsten Frame wirklich trägt.
     // Nach einer Sprung-Landung auf der Treppe (stairThrough) ist das
-    // Auto-Steigen aus: Willy lÃ¤uft geradeaus durch den Lauf hindurch.
+    // Auto-Steigen aus: Willy läuft geradeaus durch den Lauf hindurch.
     if (game.onGround && !game.stairThrough){
       const lead = dx > 0 ? Math.floor((game.px + PW) / TILE) : Math.floor(game.px / TILE);
       const stepRow = Math.floor((game.py + PH) / TILE) - 1;
@@ -2586,13 +2589,13 @@ function physTick(){
     for (let tx=x0; tx<=x1; tx++){
       const t = tileAtPlay(room, tx, ty);
       const top = ty*TILE;
-      // Stufen fangen jeden fallenden Spieler, dessen FÃ¼ÃŸe ihre Zeile
-      // berÃ¼hren â€“ egal ob von oben oder seitlich eingeflogen (Schnapp-
-      // Landung, max. eine StufenhÃ¶he Anhebung). Steigen bleibt frei.
+      // Stufen fangen jeden fallenden Spieler, dessen Füße ihre Zeile
+      // berühren – egal ob von oben oder seitlich eingeflogen (Schnapp-
+      // Landung, max. eine Stufenhöhe Anhebung). Steigen bleibt frei.
       if (SOLID(t) || t === T.STAIR || (t===T.PLAT && prevBottom <= top + 4)){
         game.py = top - PH; game.vy = 0; game.onGround = true;
-        // Nur bei ECHTEN Landungen (aus der Luft) umschalten â€“ die
-        // Mikro-Landung beim Stehen darf das Flag nicht Ã¼berschreiben.
+        // Nur bei ECHTEN Landungen (aus der Luft) umschalten – die
+        // Mikro-Landung beim Stehen darf das Flag nicht überschreiben.
         // Sprung-Landung auf einer Stufe => "Durchlaufen" (kein Auto-
         // Steigen); jede andere Landung => wieder normales Klettern.
         if (!wasGrounded) game.stairThrough = (t === T.STAIR) && game.jumping;
@@ -2628,8 +2631,8 @@ function physTick(){
     if (game.py + PH < 14){
       if (world.rooms[roomKey(game.rx, game.ry-1)]){
         enterRoom(game.rx, game.ry-1, game.px, H - PH - 6); switched = true;
-        // KrÃ¤ftig Schwung mitnehmen, damit Willy im oberen Raum genug Zeit hat,
-        // seitlich auf die Bodenkante neben der LÃ¼cke zu driften
+        // Kräftig Schwung mitnehmen, damit Willy im oberen Raum genug Zeit hat,
+        // seitlich auf die Bodenkante neben der Lücke zu driften
         game.vy = Math.min(game.vy, -5.5);
       } else if (game.py < 0){ game.py = 0; game.vy = 0; }
     } else if (game.py > H - 6){
@@ -2643,7 +2646,7 @@ function physTick(){
   const curRoom = curRoomPlay();
   if (!curRoom) { die(); return; }
 
-  // Liane greifen (automatisch bei BerÃ¼hrung, wie im Original)
+  // Liane greifen (automatisch bei Berührung, wie im Original)
   if (!game.rope && game.ropeCooldown <= 0) tryGrabRope(curRoom);
 
   // Stacheln
@@ -2673,7 +2676,7 @@ function physTick(){
     }
   }
 
-  // Hebel umlegen (Ã¶ffnet alle Gitter dieses Raums)
+  // Hebel umlegen (öffnet alle Gitter dieses Raums)
   if (curRoom.switches && curRoom.switches.length){
     const skey = game.rx+","+game.ry;
     if (!game.switched.has(skey)){
@@ -2701,7 +2704,7 @@ function physTick(){
   }
   if (game.hintTimer > 0) game.hintTimer--;
 
-  // Luftvorrat (Manic-Miner-RÃ¤ume)
+  // Luftvorrat (Manic-Miner-Räume)
   if (curRoom.air){
     let drain = 1;
     const ax0 = Math.floor((game.px + 2) / TILE), ax1 = Math.floor((game.px + PW - 2) / TILE);
@@ -2738,7 +2741,7 @@ function physTick(){
     }
   }
 
-  // WÃ¤chter
+  // Wächter
   for (const g of game.guards){
     if (g.axis === 'h'){
       const nx = g.x + g.dir * g.speed;
@@ -2750,7 +2753,7 @@ function physTick(){
       }
       if (blocked) g.dir = -g.dir; else g.x = nx;
     } else if (g.axis === 'a'){
-      // JSW-Pfeil: schieÃŸt periodisch quer durchs Bild
+      // JSW-Pfeil: schießt periodisch quer durchs Bild
       const prevInX = g.x + GS > 0 && g.x < W;
       g.x += g.dir * 4;
       if (g.dir > 0 && g.x > W + 260) g.x = -GS - 260;
@@ -2758,7 +2761,7 @@ function physTick(){
       const nowInX = g.x + GS > 0 && g.x < W;
       if (!prevInX && nowInX) sndArrow();
     } else if (g.axis === 'f'){
-      // Skylab: fÃ¤llt, zerschellt, taucht versetzt wieder auf (Manic Miner)
+      // Skylab: fällt, zerschellt, taucht versetzt wieder auf (Manic Miner)
       if (g.state === 'crash'){
         g.timer++;
         if (g.timer > 26){
@@ -2829,7 +2832,7 @@ const ctx = cv.getContext("2d");
 ctx.imageSmoothingEnabled = false;
 
 function renderRoomTiles(room, isPlay){
-  // Deko zuerst (Hintergrund), dann Kacheln darÃ¼ber
+  // Deko zuerst (Hintergrund), dann Kacheln darüber
   for (const d of (room.decos || [])) drawDeco(ctx, d, frameCount);
   const wallCol = WALLCOLS[room.color % WALLCOLS.length];
   for (let y=0; y<ROWS; y++){
@@ -2872,7 +2875,7 @@ function renderWilly(x, y, facing, walkFrame, ghost, colorOverride){
 
 function renderGuard(g){
   const spr = GUARD_SPRITES[g.sprite % GUARD_SPRITES.length];
-  // Spinne hÃ¤ngt am Faden
+  // Spinne hängt am Faden
   if (g.sprite === 9 && g.axis === 'v'){
     ctx.fillStyle = "#aaaaaa";
     ctx.fillRect(Math.round(g.x) + 15, 0, 2, Math.max(0, Math.round(g.y) + 8));
@@ -2937,7 +2940,7 @@ function renderHUD(room){
     for (let i=0; i<Math.max(0,game.lives); i++){
       drawBitmap(ctx, WILLY_F[0], W - 22 - i*15, H + 22, 1, "#ffffff");
     }
-    // LUFT-Leiste im Manic-Miner-Stil (nur in Luft-RÃ¤umen)
+    // LUFT-Leiste im Manic-Miner-Stil (nur in Luft-Räumen)
     if (room && room.air){
       ctx.fillStyle = "#d80000";
       ctx.fillRect(0, H+38, W, 6);
@@ -2952,9 +2955,9 @@ function renderHUD(room){
     ctx.fillStyle = "#ffff00";
     ctx.font = "bold 11px Consolas, monospace";
     ctx.textAlign = "center";
-    ctx.fillText("EDITOR â€“ " + (room ? room.name.toUpperCase() : ""), W/2, H+6);
+    ctx.fillText("EDITOR – " + (room ? room.name.toUpperCase() : ""), W/2, H+6);
     ctx.fillStyle = "#666688";
-    ctx.fillText("Linksklick: malen Â· Rechtsklick: lÃ¶schen Â· Tab: Testen", W/2, H+24);
+    ctx.fillText("Linksklick: malen · Rechtsklick: löschen · Tab: Testen", W/2, H+24);
     ctx.textAlign = "left";
   }
 }
@@ -3016,7 +3019,7 @@ function renderTitle(){
     // Ruhmeshalle
     ctx.fillStyle = BRIGHT[Math.floor(frameCount/12) % BRIGHT.length];
     ctx.font = "bold 14px Consolas, monospace";
-    ctx.fillText("â˜… RUHMESHALLE â˜…", W/2, 110);
+    ctx.fillText("★ RUHMESHALLE ★", W/2, 110);
     const list = loadScores();
     ctx.font = "bold 11px Consolas, monospace";
     for (let i=0; i<list.length; i++){
@@ -3057,17 +3060,17 @@ function renderTitle(){
   ctx.font = "bold 13px Consolas, monospace";
   if (Math.floor(frameCount/30) % 2 === 0){
     ctx.fillStyle = "#ffffff";
-    ctx.fillText("LEERTASTE DRÃœCKEN", W/2, 210);
+    ctx.fillText("LEERTASTE DRÜCKEN", W/2, 210);
   }
   ctx.fillStyle = "#666688";
   ctx.font = "11px Consolas, monospace";
-  ctx.fillText("E = EDITOR   Â·   M = MUSIK", W/2, 232);
+  ctx.fillText("E = EDITOR   ·   M = MUSIK", W/2, 232);
 
   // Versionsanzeige (Stand des Standard-Levels)
   ctx.textAlign = "right";
   ctx.fillStyle = "#666688";
   ctx.font = "10px Consolas, monospace";
-  ctx.fillText("V" + DEFAULT_REV + "Â·B" + BUILD, W-6, H-14);
+  ctx.fillText("V" + DEFAULT_REV + "·B" + BUILD, W-6, H-14);
   ctx.textAlign = "center";
 
   // Laufschrift
@@ -3133,7 +3136,7 @@ function render(){
       ctx.textAlign = "center";
       ctx.fillStyle = BRIGHT[Math.floor(frameCount/5) % BRIGHT.length];
       ctx.font = "bold 12px Consolas, monospace";
-      ctx.fillText("â˜… ALLE FLASCHEN! DIE OMA SCHLÃ„FT â€“ AB INS BETT! â˜…", W/2, 9);
+      ctx.fillText("★ ALLE FLASCHEN! DIE OMA SCHLÄFT – AB INS BETT! ★", W/2, 9);
       ctx.textAlign = "left";
     }
     if (game.state === "gameover"){
@@ -3170,16 +3173,16 @@ function render(){
         ctx.fillText("GAME OVER", W/2, by + 16);
         ctx.fillStyle = "#d8d8d8";
         ctx.font = "11px Consolas, monospace";
-        ctx.fillText("Punkte: " + game.score + " Â· Enter = weiter Â· Esc = Editor", W/2, by + 34);
+        ctx.fillText("Punkte: " + game.score + " · Enter = weiter · Esc = Editor", W/2, by + 34);
         ctx.textAlign = "left";
       }
     }
     if (game.state === "won"){
       renderOverlayBox([
         "GUTE NACHT, WILLY!",
-        "Alle " + totalItems() + " Flaschen Â· " + game.score + " Punkte",
-        "Zeit: " + clockStr() + " Uhr Â· Leben Ã¼brig: " + Math.max(0,game.lives),
-        "Enter = weiter Â· Esc = Editor",
+        "Alle " + totalItems() + " Flaschen · " + game.score + " Punkte",
+        "Zeit: " + clockStr() + " Uhr · Leben übrig: " + Math.max(0,game.lives),
+        "Enter = weiter · Esc = Editor",
       ], "#00ff00");
     }
     if (game.state === "entername"){
@@ -3191,17 +3194,17 @@ function render(){
       ctx.textAlign = "center";
       ctx.fillStyle = "#ffff00";
       ctx.font = "bold 14px Consolas, monospace";
-      ctx.fillText("â˜… NEUER HIGHSCORE! â˜…", W/2, H/2-42);
+      ctx.fillText("★ NEUER HIGHSCORE! ★", W/2, H/2-42);
       ctx.fillStyle = "#00d8d8";
       ctx.font = "bold 12px Consolas, monospace";
       ctx.fillText(game.score + " PUNKTE", W/2, H/2-20);
       ctx.fillStyle = "#ffffff";
       ctx.font = "bold 16px Consolas, monospace";
-      const cursor = (Math.floor(frameCount/15) % 2 === 0) ? "â–ˆ" : " ";
+      const cursor = (Math.floor(frameCount/15) % 2 === 0) ? "█" : " ";
       ctx.fillText("NAME: " + game.nameStr + cursor, W/2, H/2+4);
       ctx.fillStyle = "#8888aa";
       ctx.font = "10px Consolas, monospace";
-      ctx.fillText("Buchstaben tippen Â· Enter = OK Â· Esc = Ã¼berspringen", W/2, H/2+34);
+      ctx.fillText("Buchstaben tippen · Enter = OK · Esc = überspringen", W/2, H/2+34);
       ctx.textAlign = "left";
     }
   } else {
@@ -3221,21 +3224,21 @@ const TOOLS = [
   { id:"wall",   label:"Mauer",    key:"Digit1", tile:T.WALL },
   { id:"plat",   label:"Plattform",key:"Digit2", tile:T.PLAT },
   { id:"spike",  label:"Stacheln", key:"Digit3", tile:T.SPIKE },
-  { id:"convl",  label:"Band â—€",   key:"Digit4", tile:T.CONVL },
-  { id:"convr",  label:"Band â–¶",   key:"Digit5", tile:T.CONVR },
-  { id:"crumb",  label:"BrÃ¶ckel",  key:"Digit6", tile:T.CRUMBLE },
+  { id:"convl",  label:"Band ◀",   key:"Digit4", tile:T.CONVL },
+  { id:"convr",  label:"Band ▶",   key:"Digit5", tile:T.CONVR },
+  { id:"crumb",  label:"Bröckel",  key:"Digit6", tile:T.CRUMBLE },
   { id:"item",   label:"Flasche",  key:"Digit7" },
   { id:"solar",  label:"Strahl",   key:"KeyL", tile:T.SOLAR },
-  { id:"convml", label:"MM-Bandâ—€", key:"KeyQ", tile:T.CONVML },
-  { id:"convmr", label:"MM-Bandâ–¶", key:"KeyE", tile:T.CONVMR },
+  { id:"convml", label:"MM-Band◀", key:"KeyQ", tile:T.CONVML },
+  { id:"convmr", label:"MM-Band▶", key:"KeyE", tile:T.CONVMR },
   { id:"vanish", label:"Schwund",  key:"KeyV", tile:T.VANISH },
   { id:"stair",  label:"Treppe",   key:"KeyT", tile:T.STAIR },
   { id:"gate",   label:"Gitter",   key:"KeyI", tile:T.GATE },
   { id:"switch", label:"Hebel",    key:"KeyU" },
   { id:"rope",   label:"Liane",    key:"KeyJ" },
-  { id:"guardh", label:"WÃ¤chterâ†”", key:"Digit8" },
-  { id:"guardv", label:"WÃ¤chterâ†•", key:"Digit9" },
-  { id:"guardf", label:"WÃ¤chterâ†“", key:"KeyF" },
+  { id:"guardh", label:"Wächter↔", key:"Digit8" },
+  { id:"guardv", label:"Wächter↕", key:"Digit9" },
+  { id:"guardf", label:"Wächter↓", key:"KeyF" },
   { id:"arrow",  label:"Pfeil",    key:"KeyN" },
   { id:"oma",    label:"Oma",      key:"KeyO" },
   { id:"bed",    label:"Bett",     key:"KeyB" },
@@ -3265,7 +3268,7 @@ function renderEditorOverlay(room){
     ctx.textAlign = "center";
     ctx.fillStyle = "#666688";
     ctx.font = "12px Consolas, monospace";
-    ctx.fillText("Leerer Raum â€“ klicke, um ihn anzulegen", W/2, H/2);
+    ctx.fillText("Leerer Raum – klicke, um ihn anzulegen", W/2, H/2);
     ctx.textAlign = "left";
     return;
   }
@@ -3280,7 +3283,7 @@ function renderEditorOverlay(room){
     drawBitmap(ctx, spr.frames[0], g.tx*TILE, g.ty*TILE, 2, BRIGHT[(i + (g.axis==='v'?2:0)) % BRIGHT.length]);
     ctx.fillStyle = "#ffffff";
     ctx.font = "9px Consolas, monospace";
-    ctx.fillText(g.axis==='h' ? "â†”" : (g.axis==='v' ? "â†•" : (g.axis==='f' ? "â†“" : "â†’")), g.tx*TILE+12, g.ty*TILE-9);
+    ctx.fillText(g.axis==='h' ? "↔" : (g.axis==='v' ? "↕" : (g.axis==='f' ? "↓" : "→")), g.tx*TILE+12, g.ty*TILE-9);
   });
 
   if (world.start.rx === edit.x && world.start.ry === edit.y){
@@ -3552,7 +3555,7 @@ function refreshRoomUI(){
   roomNameInput.value = room ? room.name : "";
   const outdated = world.custom && world.defaultRev !== DEFAULT_REV;
   roomCoordSpan.textContent = "Raum " + (edit.x+1) + "/" + (edit.y+1) +
-    (outdated ? " Â· Standard-Level veraltet â€“ â†º lÃ¤dt V" + DEFAULT_REV : "");
+    (outdated ? " · Standard-Level veraltet – ↺ lädt V" + DEFAULT_REV : "");
   airChk.checked = !!(room && room.air);
   [...colorsDiv.children].forEach((el,i)=>el.classList.toggle("sel", room && room.color===i));
 }
@@ -3563,7 +3566,7 @@ airChk.addEventListener("change", () => {
   scheduleSave();
 });
 
-// ---------- Meine Level: benannte, dauerhafte SpeicherstÃ¤nde ----------
+// ---------- Meine Level: benannte, dauerhafte Speicherstände ----------
 const SAVES_KEY = "jsw-saves-v1";
 function loadSaves(){
   try{
@@ -3574,7 +3577,7 @@ function loadSaves(){
 }
 function storeSaves(s){
   try{ localStorage.setItem(SAVES_KEY, JSON.stringify(s)); }
-  catch(e){ alert("Speichern fehlgeschlagen â€“ Browser-Speicher voll?"); }
+  catch(e){ alert("Speichern fehlgeschlagen – Browser-Speicher voll?"); }
 }
 const savesSel = document.getElementById("savesSel");
 function refreshSaves(){
@@ -3583,7 +3586,7 @@ function refreshSaves(){
   savesSel.innerHTML = "";
   if (!names.length){
     const o = document.createElement("option");
-    o.value = ""; o.textContent = "â€“ keine â€“";
+    o.value = ""; o.textContent = "– keine –";
     savesSel.appendChild(o);
   }
   for (const n of names){
@@ -3593,10 +3596,10 @@ function refreshSaves(){
   }
 }
 document.getElementById("saveWorldBtn").addEventListener("click", () => {
-  const n = (prompt("Name fÃ¼r diesen Level-Spielstand:") || "").trim().slice(0, 24);
+  const n = (prompt("Name für diesen Level-Spielstand:") || "").trim().slice(0, 24);
   if (!n) return;
   const s = loadSaves();
-  if (s[n] && !confirm('"' + n + '" Ã¼berschreiben?')) return;
+  if (s[n] && !confirm('"' + n + '" überschreiben?')) return;
   s[n] = JSON.parse(JSON.stringify(world));
   storeSaves(s);
   refreshSaves();
@@ -3613,11 +3616,53 @@ document.getElementById("loadWorldBtn").addEventListener("click", () => {
   edit.x = world.start.rx; edit.y = world.start.ry;
   refreshRoomUI(); refreshMapGrid(); scheduleSave();
 });
+// Welt als DEFAULT_ROOMS-Quelltext exportieren (für index.html / apply-level.mjs)
+function worldToSource(){
+  const TILECH = {0:'.',1:'#',2:'=',3:'^',4:'<',5:'>',6:'%',7:'|',8:'(',9:')',10:'~',11:'T',12:'G'};
+  const parts = [];
+  for (let y=0; y<MAPH; y++) for (let x=0; x<MAPW; x++){
+    const room = world.rooms[roomKey(x,y)];
+    if (!room) continue;
+    const grid = [];
+    for (let ty=0; ty<ROWS; ty++){
+      const row = [];
+      for (let tx=0; tx<COLS; tx++) row.push(TILECH[room.tiles[ty*COLS+tx]] || '.');
+      grid.push(row);
+    }
+    const put = (tx,ty,ch) => { if (ty>=0 && ty<ROWS && tx>=0 && tx<COLS) grid[ty][tx] = ch; };
+    for (const it of room.items) put(it.tx, it.ty, '*');
+    const gsorted = [...room.guardians].sort((a,b)=> (a.ty-b.ty) || (a.tx-b.tx));
+    for (const g of gsorted) put(g.tx, g.ty, g.axis==='h'?'H':g.axis==='v'?'V':g.axis==='f'?'F':'A');
+    for (const sw of (room.switches||[])) put(sw.tx, sw.ty, '!');
+    if (room.portal) put(room.portal.tx, room.portal.ty, 'P');
+    if (room.bed) put(room.bed.tx, room.bed.ty, 'B');
+    if (room.granny) put(room.granny.tx, room.granny.ty, 'O');
+    if (world.start.rx===x && world.start.ry===y) put(world.start.tx, world.start.ty, 'S');
+    let head = "{ x:" + x + ", y:" + y + ", name:" + JSON.stringify(room.name) + ", color:" + (room.color||0);
+    const guards = gsorted.filter(g=>g.axis!=='a').map(g=>g.sprite||0);
+    head += ", guards:[" + guards.join(",") + "]";
+    if (room.air) head += ", air:true";
+    if ((room.ropes||[]).length) head += ",\n  ropes:[" + room.ropes.map(r=>"["+r.tx+","+r.ty+","+r.len+"]").join(",") + "]";
+    if ((room.decos||[]).length) head += ",\n  decos:[" + room.decos.map(d=>"["+d.tx+","+d.ty+","+d.type+"]").join(",") + "]";
+    head += ", rows:[";
+    parts.push(head + "\n" + grid.map(r=>'"'+r.join('')+'",').join("\n") + "\n]},");
+  }
+  return "const DEFAULT_ROOMS = [\n" + parts.join("\n") + "\n];";
+}
+document.getElementById("srcBtn").addEventListener("click", () => {
+  const blob = new Blob([worldToSource()], {type:"text/plain"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "default-rooms.txt";
+  a.click();
+  URL.revokeObjectURL(a.href);
+});
+
 document.getElementById("delSaveBtn").addEventListener("click", () => {
   const n = savesSel.value;
   const s = loadSaves();
   if (!n || !s[n]) return;
-  if (!confirm('"' + n + '" endgÃ¼ltig lÃ¶schen?')) return;
+  if (!confirm('"' + n + '" endgültig löschen?')) return;
   delete s[n];
   storeSaves(s);
   refreshSaves();
@@ -3646,15 +3691,15 @@ function setMode(m){
   mode = m;
   if (m === "play"){
     initGame();
-    playBtn.textContent = "â—¼ Editor (Esc)";
+    playBtn.textContent = "◼ Editor (Esc)";
     editorAside.classList.add("disabled");
   } else if (m === "edit"){
-    playBtn.textContent = "â–¶ Spielen";
+    playBtn.textContent = "▶ Spielen";
     editorAside.classList.remove("disabled");
     if (world.rooms[roomKey(game.rx, game.ry)]){ edit.x = game.rx; edit.y = game.ry; }
     refreshRoomUI();
   } else { // title
-    playBtn.textContent = "â–¶ Spielen";
+    playBtn.textContent = "▶ Spielen";
     editorAside.classList.add("disabled");
   }
   refreshMapGrid();
@@ -3697,7 +3742,7 @@ window.addEventListener("keydown", e => {
   }
   if (e.code === "KeyM"){
     music.on = !music.on;
-    musicBtn.textContent = "â™« Musik: " + (music.on ? "an" : "aus");
+    musicBtn.textContent = "♫ Musik: " + (music.on ? "an" : "aus");
     return;
   }
 
@@ -3773,10 +3818,10 @@ fileInput.addEventListener("change", () => {
   reader.onload = () => {
     try{
       const w = JSON.parse(reader.result);
-      if (!w || typeof w !== "object" || !w.rooms || !w.start) throw new Error("UngÃ¼ltiges Format");
+      if (!w || typeof w !== "object" || !w.rooms || !w.start) throw new Error("Ungültiges Format");
       for (const k in w.rooms){
         const r = w.rooms[k];
-        if (!Array.isArray(r.tiles) || r.tiles.length !== COLS*ROWS) throw new Error("UngÃ¼ltiger Raum: " + k);
+        if (!Array.isArray(r.tiles) || r.tiles.length !== COLS*ROWS) throw new Error("Ungültiger Raum: " + k);
       }
       world = normalizeWorld(w);
       setMode("edit");
@@ -3795,18 +3840,18 @@ document.getElementById("resetBtn").addEventListener("click", () => {
   setMode("edit");
   edit.x = world.start.rx; edit.y = world.start.ry;
   refreshRoomUI(); refreshMapGrid(); scheduleSave();
-  world.custom = false;   // frisches Standard-Level darf kÃ¼nftig auto-aktualisiert werden
+  world.custom = false;   // frisches Standard-Level darf künftig auto-aktualisiert werden
 });
 const muteBtn = document.getElementById("muteBtn");
 muteBtn.addEventListener("click", () => {
   sfxMuted = !sfxMuted;
-  muteBtn.textContent = sfxMuted ? "ðŸ”‡" : "ðŸ”Š";
+  muteBtn.textContent = sfxMuted ? "🔇" : "🔊";
 });
 const musicBtn = document.getElementById("musicBtn");
 musicBtn.addEventListener("click", () => {
   ensureAudio();
   music.on = !music.on;
-  musicBtn.textContent = "â™« Musik: " + (music.on ? "an" : "aus");
+  musicBtn.textContent = "♫ Musik: " + (music.on ? "an" : "aus");
 });
 
 // ---------- Vollbild (Handy) ----------
@@ -3827,7 +3872,7 @@ fsBtn.addEventListener("click", () => {
   }
 });
 document.addEventListener("fullscreenchange", () => {
-  fsBtn.textContent = document.fullscreenElement ? "â›¶ Vollbild aus" : "â›¶ Vollbild";
+  fsBtn.textContent = document.fullscreenElement ? "⛶ Vollbild aus" : "⛶ Vollbild";
 });
 
 // ---------- Offline-Betrieb (PWA) ----------
