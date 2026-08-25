@@ -1219,16 +1219,16 @@ const GUARD_SPRITES = [
 ];
 const ARROW_IDX = GUARD_SPRITES.length - 1;   // Sprite-Index des Pfeils
 
-// Flasche (8x8, Skalierung 2)
+// Flasche (8x8, Skalierung 2) – zierlich: schmaler Hals, schlanker Körper
 const BOTTLE_BMP = [
-"...##...",
-"...##...",
-"..####..",
-".######.",
-".#.####.",
-".######.",
-".######.",
-".######.",
+"...#....",
+"...#....",
+"..###...",
+"..###...",
+"..###...",
+"..###...",
+"..###...",
+"..###...",
 ];
 
 function drawBitmap(ctx, bmp, x, y, scale, color){
@@ -1267,6 +1267,44 @@ function drawBitmapVFlipped(ctx, bmp, x, y, scale, color){
 // ================================================================
 // --- DEFAULT_ROOMS_START --- (Block wird von apply-level.mjs ersetzt)
 const DEFAULT_ROOMS = [
+{ x:0, y:0, name:"Über den Dächern", color:6, guards:[12,10],
+  decos:[[20,13,12],[28,13,12]], rows:[
+"################################",
+"#..............................#",
+"#....*.................*.......#",
+"#...===..............====......#",
+"#..............................#",
+"#..===................===......#",
+"#.............................A#",
+"#......===........===..........#",
+"#.........H....................#",
+"#....===......===..............#",
+"#..............................#",
+"#.===.............===..........#",
+"#...........V..................#",
+"#.....===...............===.....",
+"#..#......#......#..............",
+"##############...###############",
+]},
+{ x:0, y:1, name:"Die Orangerie", color:3, guards:[9,6],
+  decos:[[24,14,3],[2,14,11],[6,14,11],[17,14,11],[28,14,11],[3,9,7],[26,4,7]], rows:[
+"##############...###############",
+"#..............................#",
+"#..............................#",
+"#............=====.............#",
+"#..............................#",
+"#....*....===.........*........#",
+"#...====..............====.....#",
+"#..........V...................#",
+"#..===....................===..#",
+"#.......===.........===........#",
+"#..............................#",
+"#......===........====.........#",
+"#..............................#",
+"#........W..===.........*.......",
+"#...............................",
+"################################",
+]},
 { x:1, y:0, name:"Auf dem Dach", color:6, guards:[19,10,10,6],
   decos:[[1,13,12],[28,13,12],[4,6,11],[9,6,11]], rows:[
 "################################",
@@ -1282,8 +1320,8 @@ const DEFAULT_ROOMS = [
 "#................T.............#",
 "#.................T............#",
 "#....V...V.........T...........#",
-"#..*...*...*....H...T...........",
-"#..#...#...#.........T..........",
+"...*...*...*....H...T...........",
+"...#...#...#.........T..........",
 "########################...#####",
 ]},
 { x:2, y:0, name:"Der Dachboden", color:2, guards:[7,2],
@@ -1339,8 +1377,8 @@ const DEFAULT_ROOMS = [
 "#...........T..................#",
 "#..........T...................#",
 "#.........T....................#",
-"#........T......................",
-"#.......T.......................",
+".........T......................",
+"........T.......................",
 "###############...##############",
 ]},
 { x:2, y:1, name:"Das Badezimmer", color:0, guards:[],
@@ -1686,8 +1724,8 @@ function parseAsciiRoom(def){
   return { room, start };
 }
 
-const DEFAULT_REV = 19;  // bei jeder Änderung am Standard-Level erhöhen
-const BUILD = 25;        // bei JEDER Code-Änderung erhöhen (Anzeige im Titel)
+const DEFAULT_REV = 20;  // bei jeder Änderung am Standard-Level erhöhen
+const BUILD = 26;        // bei JEDER Code-Änderung erhöhen (Anzeige im Titel)
 
 function buildDefaultWorld(){
   const w = { start:{rx:2,ry:1,tx:5,ty:14}, rooms:{}, defaultRev:DEFAULT_REV, custom:false };
@@ -2079,7 +2117,7 @@ function drawBottle(ctx, px, py, frame, seed){
   const col = BRIGHT[(Math.floor(frame/6) + seed) % 4];
   drawBitmap(ctx, BOTTLE_BMP, px, py, 2, col);
   ctx.fillStyle = '#ffffff';
-  ctx.fillRect(px+4, py+8, 2, 4);
+  ctx.fillRect(px+5, py+8, 2, 4);
 }
 
 function drawBed(ctx, tx, ty){
@@ -2141,6 +2179,7 @@ const DECO_TYPES = [
   {name:"Teppich",      w:2, h:1},
   {name:"Rüstung",      w:1, h:2},
   {name:"Stehlampe",    w:1, h:2},
+  {name:"Stuhl ▶",      w:1, h:1},
 ];
 function drawDeco(ctx, d, frame){
   const x = d.tx*TILE, y = d.ty*TILE;
@@ -2167,10 +2206,10 @@ function drawDeco(ctx, d, frame){
       ctx.fillRect(x+2, y+5, 12, 4);
       ctx.fillRect(x+6, y+9, 4, 7);
       break;
-    case 3: // Tisch
+    case 3: // Tisch (Platte ganz oben – Flaschen darüber stehen sauber auf)
       ctx.fillStyle = "#8a5020";
-      ctx.fillRect(x+1, y+6, 30, 3);
-      ctx.fillRect(x+3, y+9, 3, 7); ctx.fillRect(x+26, y+9, 3, 7);
+      ctx.fillRect(x+1, y, 30, 3);
+      ctx.fillRect(x+3, y+3, 3, 13); ctx.fillRect(x+26, y+3, 3, 13);
       break;
     case 4: // Stuhl
       ctx.fillStyle = "#8a5020";
@@ -2307,6 +2346,12 @@ function drawDeco(ctx, d, frame){
       ctx.fillRect(x+4, y+28, 8, 3);
       break;
     }
+    case 19: // Stuhl nach rechts (Lehne rechts)
+      ctx.fillStyle = "#8a5020";
+      ctx.fillRect(x+10, y+1, 3, 10);
+      ctx.fillRect(x+3, y+8, 10, 3);
+      ctx.fillRect(x+3, y+11, 3, 5); ctx.fillRect(x+10, y+11, 3, 5);
+      break;
   }
 }
 
