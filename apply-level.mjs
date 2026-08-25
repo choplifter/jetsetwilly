@@ -44,4 +44,6 @@ html = html.replace(/const DEFAULT_REV = (\d+);/, (m, n) => {
   return "const DEFAULT_REV = " + neueRev + ";";
 });
 fs.writeFileSync("index.html", html, "utf8");
-console.log("OK: " + rows + " Kartenzeilen übernommen, DEFAULT_REV -> " + neueRev + ".");
+// Exportdatei nach erfolgreicher Übernahme aufräumen
+try{ fs.unlinkSync(src); }catch(e){}
+console.log("OK: " + rows + " Kartenzeilen übernommen, DEFAULT_REV -> " + neueRev + ", " + src + " gelöscht.");
