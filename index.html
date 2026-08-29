@@ -1665,21 +1665,20 @@ const DEFAULT_ROOMS = [
 "###....#########################",
 ]},
 { x:6, y:2, name:"At the Foot of the MegaTree", color:8, wallStyle:"checker", guards:[9,9,8],
-  decos:[[15,3,20],[16,3,20],[17,3,20],[11,4,20],[13,5,20],[14,5,20],[11,7,20],[16,7,20],[16,9,20],[17,9,20],[11,10,20],[12,10,20],[16,12,20],[15,12,20]],
-  wallStyles:[[31,13,"checker"],[31,14,"checker"]], rows:[
+  wallStyles:[[15,3,"leaf"],[16,3,"leaf"],[17,3,"leaf"],[11,4,"leaf"],[13,5,"leaf"],[14,5,"leaf"],[11,7,"leaf"],[16,7,"leaf"],[16,9,"leaf"],[17,9,"leaf"],[11,10,"leaf"],[12,10,"leaf"],[16,12,"leaf"],[15,12,"leaf"],[31,13,"checker"],[31,14,"checker"]], rows:[
 "#Y##Y##Y######.....#############",
 "#Y..Y..Y..#.......##############",
 "#Y..Y..Y..#....................#",
+"#Y..Y..Y..#....===.............#",
+"#Y..Y..Y..#=......##############",
+"#Y..Y..Y..#..==................#",
 "#Y..Y..Y..#....................#",
-"#Y..Y..Y..#.......##############",
-"#Y..Y..Y..#....................#",
-"#Y..Y..Y..#....................#",
-"#Y..Y..Y..#.......##############",
+"#Y..Y..Y..#=....=.##############",
 "#YV.YV.Y..#....................#",
-"#Y..Y..Y..#....................#",
-"#Y..Y..Y..#....................#",
+"#Y..Y..Y..#.....==.............#",
+"#Y..Y..Y..#==..................#",
 "#.........#....................#",
-"#..............................#",
+"#..............==..............#",
 "........V......................#",
 "...............................#",
 "################################",
@@ -1860,8 +1859,8 @@ function parseAsciiRoom(def){
   return { room, start };
 }
 
-const DEFAULT_REV = 34;  // bei jeder Änderung am Standard-Level erhöhen
-const BUILD = 36;        // bei JEDER Code-Änderung erhöhen (Anzeige im Titel)
+const DEFAULT_REV = 35;  // bei jeder Änderung am Standard-Level erhöhen
+const BUILD = 37;        // bei JEDER Code-Änderung erhöhen (Anzeige im Titel)
 
 function buildDefaultWorld(){
   const w = { start:{rx:2,ry:1,tx:5,ty:14}, rooms:{}, defaultRev:DEFAULT_REV, custom:false };
@@ -2125,21 +2124,6 @@ function drawTile(ctx, t, px, py, s, wallCol, frame, crumbleDecay, wallStyle){
         ctx.fillRect(px + 13*u, py, u, s);
         const knot = (Math.floor(px/u) + Math.floor(py/u)*3) % 7;
         if (knot === 0){ ctx.fillRect(px + 5*u, py + 6*u, 3*u, 3*u); }
-      } else if (wallStyle === 'leaf'){
-        // Belaubte Wand: gemustertes Blattwerk (dunkelgruener Grund, zwei helle Toene)
-        ctx.fillStyle = '#004800';
-        ctx.fillRect(px, py, s, s);
-        const seed = (Math.floor(px/u)*7 + Math.floor(py/u)*13) % 5;
-        ctx.fillStyle = '#00a800';
-        for (let i=0;i<6;i++){
-          const bx = ((i*5 + seed*3) % 13) + 1, by = ((i*7 + seed*2) % 11) + 1;
-          ctx.fillRect(px+bx*u, py+by*u, 3*u, 3*u);
-        }
-        ctx.fillStyle = '#00d800';
-        for (let i=0;i<4;i++){
-          const bx = ((i*6 + seed*5 + 2) % 14) + 1, by = ((i*4 + seed*3 + 1) % 12) + 1;
-          ctx.fillRect(px+bx*u, py+by*u, 2*u, 2*u);
-        }
       } else {
         ctx.fillStyle = wallCol[0];
         ctx.fillRect(px, py, s, s);
@@ -2153,14 +2137,27 @@ function drawTile(ctx, t, px, py, s, wallCol, frame, crumbleDecay, wallStyle){
       break;
     }
     case T.PLAT: {
-      ctx.fillStyle = wallCol[0];
-      ctx.fillRect(px, py, s, 5*u);
-      ctx.fillStyle = '#000';
-      ctx.fillRect(px + 2*u, py + 2*u, 2*u, u);
-      ctx.fillRect(px + 8*u, py + 2*u, 2*u, u);
-      ctx.fillRect(px + 13*u, py + 2*u, 2*u, u);
-      ctx.fillStyle = wallCol[1];
-      ctx.fillRect(px, py + 5*u, s, u);
+      if (wallStyle === 'leaf'){
+        // Blatt-Plattform: gleiches Sprite wie der ehemalige Deko-Typ "Blatt",
+        // vertikal gespiegelt (Stiel oben, Blaetter haengen nach unten) - man
+        // kann von unten durchspringen und oben drauf stehen (PLAT-Physik)
+        ctx.fillStyle = "#00c800";
+        ctx.fillRect(px+2*u, py+4*u, 2*u, 5*u);
+        ctx.fillRect(px+5*u, py+4*u, 2*u, 9*u);
+        ctx.fillRect(px+8*u, py+4*u, 2*u, 6*u);
+        ctx.fillRect(px+11*u, py+4*u, 2*u, 9*u);
+        ctx.fillStyle = "#008800";
+        ctx.fillRect(px+2*u, py+3*u, 12*u, 2*u);
+      } else {
+        ctx.fillStyle = wallCol[0];
+        ctx.fillRect(px, py, s, 5*u);
+        ctx.fillStyle = '#000';
+        ctx.fillRect(px + 2*u, py + 2*u, 2*u, u);
+        ctx.fillRect(px + 8*u, py + 2*u, 2*u, u);
+        ctx.fillRect(px + 13*u, py + 2*u, 2*u, u);
+        ctx.fillStyle = wallCol[1];
+        ctx.fillRect(px, py + 5*u, s, u);
+      }
       break;
     }
     case T.SPIKE: {
@@ -2375,7 +2372,6 @@ const DECO_TYPES = [
   {name:"Rüstung",      w:1, h:2},
   {name:"Stehlampe",    w:1, h:2},
   {name:"Stuhl ▶",      w:1, h:1},
-  {name:"Blatt",        w:1, h:1},
 ];
 function drawDeco(ctx, d, frame){
   const x = d.tx*TILE, y = d.ty*TILE;
@@ -2547,15 +2543,6 @@ function drawDeco(ctx, d, frame){
       ctx.fillRect(x+10, y+1, 3, 10);
       ctx.fillRect(x+3, y+8, 10, 3);
       ctx.fillRect(x+3, y+11, 3, 5); ctx.fillRect(x+10, y+11, 3, 5);
-      break;
-    case 20: // Blatt (Blaetter-Buschel fuer Baum-Raeume)
-      ctx.fillStyle = "#00c800";
-      ctx.fillRect(x+2, y+7, 2, 5);
-      ctx.fillRect(x+5, y+3, 2, 9);
-      ctx.fillRect(x+8, y+6, 2, 6);
-      ctx.fillRect(x+11, y+3, 2, 9);
-      ctx.fillStyle = "#008800";
-      ctx.fillRect(x+2, y+11, 12, 2);
       break;
   }
 }
@@ -3834,14 +3821,18 @@ function applyTool(tx, ty, erase){
     room.decos.push({tx:dx, ty:dy, type:edit.decoType});
   } else if (tool.tile !== undefined){
     removeEntities();
-    room.tiles[idx] = tool.tile;
+    // Wandstil "Blatt" wird als begehbare Plattform gemalt (durchspringbar von
+    // unten, oben begehbar), nicht als massive Wand - daher Kachel-Typ tauschen
+    const placedTile = (tool.tile === T.WALL && edit.wallStyle === 'leaf') ? T.PLAT : tool.tile;
+    room.tiles[idx] = placedTile;
     // Wandstil & Farbe werden nur beim Malen selbst uebernommen - bestehende
     // Kacheln behalten ihr Aussehen, auch wenn die Regler spaeter wechseln
     room.tileStyleMap = room.tileStyleMap || {};
     room.tileColorMap = room.tileColorMap || {};
     if (tool.tile === T.WALL && edit.wallStyle) room.tileStyleMap[tx+","+ty] = edit.wallStyle;
+    else if (placedTile === T.PLAT && edit.wallStyle === 'leaf') room.tileStyleMap[tx+","+ty] = edit.wallStyle;
     else delete room.tileStyleMap[tx+","+ty];
-    if ((tool.tile === T.WALL || tool.tile === T.PLAT) && edit.color !== room.color) room.tileColorMap[tx+","+ty] = edit.color;
+    if ((placedTile === T.WALL || placedTile === T.PLAT) && edit.color !== room.color) room.tileColorMap[tx+","+ty] = edit.color;
     else delete room.tileColorMap[tx+","+ty];
   } else if (tool.id === "item"){
     room.tiles[idx] = T.EMPTY;
