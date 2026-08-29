@@ -1787,23 +1787,24 @@ const DEFAULT_ROOMS = [
 "..............#....#............",
 "###############....#############",
 ]},
-{ x:6, y:2, name:"At the Foot of the MegaTree", color:10, wallStyle:"checker", guards:[13,6,6],
-  decos:[[5,11,11],[24,5,11]], rows:[
-"###############.P..#############",
-"#..............................#",
-"#..............................#",
-"#..............................#",
-"#..............................#",
-"#.....................H........#",
-"#..............................#",
-"#......H............=======....#",
-"#..............................#",
-"#....=======...........*.......#",
-"#..............................#",
-"#....*..............=======....#",
-"#..............................#",
-"#W.=======.....................#",
-"#..............................#",
+{ x:6, y:2, name:"At the Foot of the MegaTree", color:8, wallStyle:"checker", guards:[9,9,13],
+  ropes:[[1,0,11],[4,0,11],[7,0,9],[14,0,10]],
+  decos:[[15,3,20],[16,3,20],[17,3,20],[11,4,20],[13,5,20],[14,5,20],[11,7,20],[16,7,20],[16,9,20],[17,9,20],[11,10,20],[12,10,20]], rows:[
+"###############....#############",
+"#.........#.......##############",
+"#.........#....................#",
+"#.........#....................#",
+"#.........#.......##############",
+"#.........#....................#",
+"#.........#....................#",
+"#.........#.......##############",
+"#.V..V....#....................#",
+"#......V..#....................#",
+"#.........#....................#",
+"#.........#....................#",
+"#.........#....................#",
+"#.........#....*...............#",
+"#.........#....................#",
 "################################",
 ]},
 { x:7, y:0, name:"We Must Perform a Quirkafleeg", color:9, wallStyle:"stripe", bg:"#2020e0", guards:[4,21],
@@ -1923,8 +1924,8 @@ function parseAsciiRoom(def){
   return { room, start };
 }
 
-const DEFAULT_REV = 27;  // bei jeder Änderung am Standard-Level erhöhen
-const BUILD = 29;        // bei JEDER Code-Änderung erhöhen (Anzeige im Titel)
+const DEFAULT_REV = 28;  // bei jeder Änderung am Standard-Level erhöhen
+const BUILD = 30;        // bei JEDER Code-Änderung erhöhen (Anzeige im Titel)
 
 function buildDefaultWorld(){
   const w = { start:{rx:2,ry:1,tx:5,ty:14}, rooms:{}, defaultRev:DEFAULT_REV, custom:false };
@@ -2404,6 +2405,7 @@ const DECO_TYPES = [
   {name:"Rüstung",      w:1, h:2},
   {name:"Stehlampe",    w:1, h:2},
   {name:"Stuhl ▶",      w:1, h:1},
+  {name:"Blatt",        w:1, h:1},
 ];
 function drawDeco(ctx, d, frame){
   const x = d.tx*TILE, y = d.ty*TILE;
@@ -2575,6 +2577,15 @@ function drawDeco(ctx, d, frame){
       ctx.fillRect(x+10, y+1, 3, 10);
       ctx.fillRect(x+3, y+8, 10, 3);
       ctx.fillRect(x+3, y+11, 3, 5); ctx.fillRect(x+10, y+11, 3, 5);
+      break;
+    case 20: // Blatt (Blaetter-Buschel fuer Baum-Raeume)
+      ctx.fillStyle = "#00c800";
+      ctx.fillRect(x+2, y+7, 2, 5);
+      ctx.fillRect(x+5, y+3, 2, 9);
+      ctx.fillRect(x+8, y+6, 2, 6);
+      ctx.fillRect(x+11, y+3, 2, 9);
+      ctx.fillStyle = "#008800";
+      ctx.fillRect(x+2, y+11, 12, 2);
       break;
   }
 }
