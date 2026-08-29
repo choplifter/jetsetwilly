@@ -119,6 +119,7 @@
   .swatch{width:22px; height:22px; border:2px solid var(--border); cursor:pointer;}
   .swatch.sel{border-color:#fff;}
   #wallStyles{display:flex; gap:4px; flex-wrap:wrap;}
+  #ropeStyles{display:flex; gap:4px;}
   #bgColors{display:flex; gap:4px;}
   .styleBtn{font-size:10px; padding:3px 6px; background:#101018; border:2px solid var(--border); color:var(--ink); cursor:pointer;}
   .styleBtn.sel{border-color:var(--accent); color:var(--accent); background:#20200a;}
@@ -225,6 +226,7 @@
     <div class="row"><input id="roomName" maxlength="28" title="Raumname"></div>
     <div class="row"><span style="font-size:11px">Farbe:</span><div id="colors"></div></div>
     <div class="row"><span style="font-size:11px">Wandstil:</span><div id="wallStyles"></div></div>
+    <div class="row"><span style="font-size:11px">Liane:</span><div id="ropeStyles"></div></div>
     <div class="row"><button id="clearRoomBtn">Raum leeren</button><button id="delRoomBtn">Raum löschen</button><span id="roomCoord" style="font-size:11px;color:#8888aa"></span></div>
     <label class="row" style="font-size:11px;cursor:pointer"><input type="checkbox" id="airChk"> Luftvorrat (Manic-Miner-Raum)</label>
     <label class="row" style="font-size:11px;cursor:pointer"><input type="checkbox" id="nmChk"> Albtraum (Willy als fliegendes Schwein)</label>
@@ -1768,7 +1770,7 @@ const DEFAULT_ROOMS = [
 "................................",
 ".##############....#############",
 ]},
-{ x:6, y:1, name:"Inside the MegaTrunk", color:8, wallStyle:"bark", guards:[3,3,3,2,2,15],
+{ x:6, y:1, name:"Inside the MegaTrunk", color:8, wallStyle:"bark", ropeStyle:"chain", guards:[3,3,3,2,2,15],
   ropes:[[15,1,13],[16,1,13],[17,1,13]],
   rows:[
 ".##############....#############",
@@ -1788,7 +1790,7 @@ const DEFAULT_ROOMS = [
 "..............#....#............",
 "###############....#############",
 ]},
-{ x:6, y:2, name:"At the Foot of the MegaTree", color:8, wallStyle:"checker", guards:[9,9,13],
+{ x:6, y:2, name:"At the Foot of the MegaTree", color:8, wallStyle:"checker", ropeStyle:"chain", guards:[9,9,13],
   ropes:[[14,0,10]],
   decos:[[15,3,20],[16,3,20],[17,3,20],[11,4,20],[13,5,20],[14,5,20],[11,7,20],[16,7,20],[16,9,20],[17,9,20],[11,10,20],[12,10,20]], rows:[
 "#Y##Y##Y#######....#############",
@@ -1923,11 +1925,12 @@ function parseAsciiRoom(def){
   room.nightmare = !!def.nightmare;
   if (def.bg) room.bg = def.bg;
   if (def.wallStyle) room.wallStyle = def.wallStyle;
+  if (def.ropeStyle) room.ropeStyle = def.ropeStyle;
   return { room, start };
 }
 
-const DEFAULT_REV = 30;  // bei jeder Änderung am Standard-Level erhöhen
-const BUILD = 32;        // bei JEDER Code-Änderung erhöhen (Anzeige im Titel)
+const DEFAULT_REV = 31;  // bei jeder Änderung am Standard-Level erhöhen
+const BUILD = 33;        // bei JEDER Code-Änderung erhöhen (Anzeige im Titel)
 
 function buildDefaultWorld(){
   const w = { start:{rx:2,ry:1,tx:5,ty:14}, rooms:{}, defaultRev:DEFAULT_REV, custom:false };
@@ -2692,12 +2695,20 @@ function ropePoint(rope, idx, d){
   return { x: rope.tx*TILE + 8 + Math.sin(a) * d * 8,
            y: rope.ty*TILE + 8 + Math.cos(a) * d * 8 };
 }
-function renderRope(rope, idx){
-  ctx.fillStyle = "#00d800";
+function renderRope(rope, idx, style){
   const n = rope.len * 2;
-  for (let d=1; d<=n; d++){
-    const p = ropePoint(rope, idx, d);
-    ctx.fillRect(p.x-1, p.y-2, 3, 5);
+  if (style === "chain"){
+    for (let d=1; d<=n; d++){
+      const p = ropePoint(rope, idx, d);
+      ctx.fillStyle = (Math.floor(d/2) % 2 === 0) ? "#d8d800" : "#000000";
+      ctx.fillRect(p.x-2, p.y-3, 5, 6);
+    }
+  } else {
+    ctx.fillStyle = "#00d800";
+    for (let d=1; d<=n; d++){
+      const p = ropePoint(rope, idx, d);
+      ctx.fillRect(p.x-1, p.y-2, 3, 5);
+    }
   }
 }
 function tryGrabRope(room){
@@ -3340,7 +3351,7 @@ function renderRoomTiles(room, isPlay){
       drawTile(ctx, t, x*TILE, y*TILE, TILE, wallCol, frameCount, decay, wallStyle);
     }
   }
-  (room.ropes || []).forEach((r, i) => renderRope(r, i));
+  (room.ropes || []).forEach((r, i) => renderRope(r, i, room.ropeStyle));
 }
 
 function renderWilly(x, y, facing, walkFrame, ghost, colorOverride){
@@ -4084,6 +4095,27 @@ function buildWallStyles(){
   });
 }
 
+const ROPE_STYLES = [
+  {id:"", label:"Grün"},
+  {id:"chain", label:"Kette"},
+];
+const ropeStylesDiv = document.getElementById("ropeStyles");
+function buildRopeStyles(){
+  ROPE_STYLES.forEach(rs => {
+    const el = document.createElement("button");
+    el.className = "styleBtn";
+    el.type = "button";
+    el.textContent = rs.label;
+    el.addEventListener("click", () => {
+      const room = curEditRoom(true);
+      if (rs.id) room.ropeStyle = rs.id; else delete room.ropeStyle;
+      refreshRoomUI();
+      scheduleSave();
+    });
+    ropeStylesDiv.appendChild(el);
+  });
+}
+
 const mapDiv = document.getElementById("mapgrid");
 function buildMapGrid(){
   for (let y=0; y<MAPH; y++) for (let x=0; x<MAPW; x++){
@@ -4122,6 +4154,7 @@ function refreshRoomUI(){
   nmChk.checked = !!(room && room.nightmare);
   [...colorsDiv.children].forEach((el,i)=>el.classList.toggle("sel", room && room.color===i));
   [...wallStylesDiv.children].forEach((el,i)=>el.classList.toggle("sel", room && (room.wallStyle||"")===WALL_STYLES[i].id));
+  [...ropeStylesDiv.children].forEach((el,i)=>el.classList.toggle("sel", room && (room.ropeStyle||"")===ROPE_STYLES[i].id));
   [...bgColorsDiv.children].forEach((el,i)=>el.classList.toggle("sel", room && (room.bg||null)===BG_COLORS[i].id));
 }
 const airChk = document.getElementById("airChk");
@@ -4236,6 +4269,7 @@ function worldToSource(){
     let head = "{ x:" + x + ", y:" + y + ", name:" + JSON.stringify(room.name) + ", color:" + (room.color||0);
     if (room.wallStyle) head += ", wallStyle:" + JSON.stringify(room.wallStyle);
     if (room.bg) head += ", bg:" + JSON.stringify(room.bg);
+    if (room.ropeStyle) head += ", ropeStyle:" + JSON.stringify(room.ropeStyle);
     const guards = gsorted.filter(g=>g.axis!=='a').map(g=>g.sprite||0);
     head += ", guards:[" + guards.join(",") + "]";
     if (room.air) head += ", air:true";
@@ -4549,7 +4583,7 @@ if ('serviceWorker' in navigator && location.protocol === 'https:'){
 // ================================================================
 world = loadWorld();
 edit.x = world.start.rx; edit.y = world.start.ry;
-buildTools(); buildGuardSprites(); buildDecoSprites(); buildColors(); buildWallStyles(); buildBgColors(); buildMapGrid();
+buildTools(); buildGuardSprites(); buildDecoSprites(); buildColors(); buildWallStyles(); buildRopeStyles(); buildBgColors(); buildMapGrid();
 refreshRoomUI(); refreshMapGrid(); refreshSaves();
 setMode("title");
 cv.focus();
