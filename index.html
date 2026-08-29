@@ -119,6 +119,7 @@
   .swatch{width:22px; height:22px; border:2px solid var(--border); cursor:pointer;}
   .swatch.sel{border-color:#fff;}
   #wallStyles{display:flex; gap:4px; flex-wrap:wrap;}
+  #bgColors{display:flex; gap:4px;}
   .styleBtn{font-size:10px; padding:3px 6px; background:#101018; border:2px solid var(--border); color:var(--ink); cursor:pointer;}
   .styleBtn.sel{border-color:var(--accent); color:var(--accent); background:#20200a;}
   #mapgrid{display:grid; grid-template-columns:repeat(8,1fr); gap:3px;}
@@ -227,7 +228,7 @@
     <div class="row"><button id="clearRoomBtn">Raum leeren</button><button id="delRoomBtn">Raum löschen</button><span id="roomCoord" style="font-size:11px;color:#8888aa"></span></div>
     <label class="row" style="font-size:11px;cursor:pointer"><input type="checkbox" id="airChk"> Luftvorrat (Manic-Miner-Raum)</label>
     <label class="row" style="font-size:11px;cursor:pointer"><input type="checkbox" id="nmChk"> Albtraum (Willy als fliegendes Schwein)</label>
-    <label class="row" style="font-size:11px;cursor:pointer"><input type="checkbox" id="skyChk"> Himmel statt Schwarz (Außenraum)</label>
+    <div class="row"><span style="font-size:11px">Hintergrund:</span><div id="bgColors"></div></div>
 
     <h2>MEINE LEVEL</h2>
     <div class="row">
@@ -1926,7 +1927,7 @@ function parseAsciiRoom(def){
 }
 
 const DEFAULT_REV = 29;  // bei jeder Änderung am Standard-Level erhöhen
-const BUILD = 31;        // bei JEDER Code-Änderung erhöhen (Anzeige im Titel)
+const BUILD = 32;        // bei JEDER Code-Änderung erhöhen (Anzeige im Titel)
 
 function buildDefaultWorld(){
   const w = { start:{rx:2,ry:1,tx:5,ty:14}, rooms:{}, defaultRev:DEFAULT_REV, custom:false };
@@ -4119,9 +4120,9 @@ function refreshRoomUI(){
     (outdated ? " · Standard-Level veraltet – ↺ lädt V" + DEFAULT_REV : "");
   airChk.checked = !!(room && room.air);
   nmChk.checked = !!(room && room.nightmare);
-  skyChk.checked = !!(room && room.bg);
   [...colorsDiv.children].forEach((el,i)=>el.classList.toggle("sel", room && room.color===i));
   [...wallStylesDiv.children].forEach((el,i)=>el.classList.toggle("sel", room && (room.wallStyle||"")===WALL_STYLES[i].id));
+  [...bgColorsDiv.children].forEach((el,i)=>el.classList.toggle("sel", room && (room.bg||null)===BG_COLORS[i].id));
 }
 const airChk = document.getElementById("airChk");
 airChk.addEventListener("change", () => {
@@ -4129,13 +4130,30 @@ airChk.addEventListener("change", () => {
   room.air = airChk.checked;
   scheduleSave();
 });
-const skyChk = document.getElementById("skyChk");
-const SKY_COLOR = "#2020e0";
-skyChk.addEventListener("change", () => {
-  const room = curEditRoom(true);
-  if (skyChk.checked) room.bg = SKY_COLOR; else delete room.bg;
-  scheduleSave();
-});
+
+const BG_COLORS = [
+  {id:null,        label:"Schwarz (innen)"},
+  {id:"#2020e0",   label:"Himmel"},
+  {id:"#000060",   label:"Nacht"},
+  {id:"#4a0060",   label:"Dämmerung"},
+  {id:"#004848",   label:"Tiefwasser"},
+];
+const bgColorsDiv = document.getElementById("bgColors");
+function buildBgColors(){
+  BG_COLORS.forEach((bc, i) => {
+    const el = document.createElement("div");
+    el.className = "swatch";
+    el.style.background = bc.id || "#000";
+    el.title = bc.label;
+    el.addEventListener("click", () => {
+      const room = curEditRoom(true);
+      if (bc.id) room.bg = bc.id; else delete room.bg;
+      refreshRoomUI();
+      scheduleSave();
+    });
+    bgColorsDiv.appendChild(el);
+  });
+}
 const nmChk = document.getElementById("nmChk");
 nmChk.addEventListener("change", () => {
   const room = curEditRoom(true);
@@ -4531,7 +4549,7 @@ if ('serviceWorker' in navigator && location.protocol === 'https:'){
 // ================================================================
 world = loadWorld();
 edit.x = world.start.rx; edit.y = world.start.ry;
-buildTools(); buildGuardSprites(); buildDecoSprites(); buildColors(); buildWallStyles(); buildMapGrid();
+buildTools(); buildGuardSprites(); buildDecoSprites(); buildColors(); buildWallStyles(); buildBgColors(); buildMapGrid();
 refreshRoomUI(); refreshMapGrid(); refreshSaves();
 setMode("title");
 cv.focus();
