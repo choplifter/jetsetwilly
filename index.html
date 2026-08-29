@@ -294,6 +294,8 @@ const WALLCOLS = [
   ['#d80000','#500000'], ['#2020e0','#000060'], ['#d800d8','#500050'],
   ['#00b800','#004000'], ['#00c0c0','#004848'], ['#c0a000','#484000'],
   ['#b0b0b0','#404040'],
+  ['#e000e0','#00d8d8'], ['#d80000','#c0a000'], ['#00c0c0','#b0b0b0'],
+  ['#d80000','#2020e0'],
 ];
 
 // ================================================================
@@ -1179,6 +1181,43 @@ const GUARD_SPRITES = [
 "................",
 "................",
 ]]},
+{ name:"Stern", frames:[
+[
+"................",
+"................",
+"................",
+".......##.......",
+".......##.......",
+".....#.##.#.....",
+"......####......",
+"...##########...",
+"...##########...",
+"......####......",
+".....#.##.#.....",
+".......##.......",
+".......##.......",
+"................",
+"................",
+"................",
+],
+[
+"................",
+"................",
+"................",
+"................",
+"................",
+".......##.......",
+".......##.......",
+".....######.....",
+".....######.....",
+".......##.......",
+".......##.......",
+"................",
+"................",
+"................",
+"................",
+"................",
+]]},
 { name:"Pfeil", frames:[
 [
 "................",
@@ -1666,7 +1705,7 @@ const DEFAULT_ROOMS = [
 "#.......................G.*.*..#",
 "################################",
 ]},
-{ x:4, y:0, name:"Der Albtraum-Raum", color:2, guards:[4,10,13,3,6,12], nightmare:true,
+{ x:4, y:0, name:"The Nightmare Room", color:5, wallStyle:"checker", guards:[3,3,3,3,3,3], nightmare:true,
   decos:[[16,13,15]], rows:[
 "................................",
 "................................",
@@ -1685,7 +1724,7 @@ const DEFAULT_ROOMS = [
 "..*.............................",
 "################################",
 ]},
-{ x:5, y:0, name:"Der Wächterturm", color:6, guards:[18],
+{ x:5, y:0, name:"Watch Tower", color:7, wallStyle:"checker", bg:"#2020e0", guards:[18],
   decos:[[14,5,7]], rows:[
 "................................",
 "................................",
@@ -1694,7 +1733,7 @@ const DEFAULT_ROOMS = [
 "................................",
 "................................",
 "................................",
-".....====..............====.....",
+".....>>>>..............<<<<.....",
 "......##................##......",
 "......##................##......",
 "......##................##......",
@@ -1704,7 +1743,7 @@ const DEFAULT_ROOMS = [
 "......##................##......",
 "#.....##................##......",
 ]},
-{ x:6, y:0, name:"Die Baumkrone", color:3, guards:[12,9],
+{ x:6, y:0, name:"Tree Top", color:3, bg:"#2020e0", guards:[12,9],
   decos:[[4,3,11],[26,3,11]], rows:[
 "................................",
 "................................",
@@ -1723,7 +1762,7 @@ const DEFAULT_ROOMS = [
 "................................",
 ".##############....#############",
 ]},
-{ x:7, y:0, name:"Wir müssen einen Quirkafleeg aufführen", color:2, guards:[],
+{ x:7, y:0, name:"We Must Perform a Quirkafleeg", color:9, wallStyle:"stripe", bg:"#2020e0", guards:[21,4],
   rows:[
 "................................",
 "................................",
@@ -1731,10 +1770,10 @@ const DEFAULT_ROOMS = [
 "................................",
 ".............................A..",
 "................................",
-"................................",
+"...............F................",
 "....A...................*.......",
 "................................",
-"..#.........#.........#.........",
+"..#.........#.........#.F.......",
 "..#......*..#......*..#.........",
 "..#.....====#.....====#.........",
 "..#....#....#....#....#....#....",
@@ -1742,7 +1781,7 @@ const DEFAULT_ROOMS = [
 "..#====#....#====#....#====#....",
 "################################",
 ]},
-{ x:6, y:1, name:"Der Baumstamm", color:5, guards:[9,10],
+{ x:6, y:1, name:"Inside the MegaTrunk", color:8, wallStyle:"bark", guards:[9,10],
   ropes:[[15,1,13],[18,1,13]],
   rows:[
 ".##############....#############",
@@ -1762,7 +1801,7 @@ const DEFAULT_ROOMS = [
 "..............#....#............",
 "###############....#############",
 ]},
-{ x:6, y:2, name:"Die Baumwurzeln", color:5, guards:[17,6],
+{ x:6, y:2, name:"At the Foot of the MegaTree", color:10, wallStyle:"checker", guards:[17,6],
   decos:[[5,9,11],[24,9,11]], rows:[
 "###############....#############",
 "#..............................#",
@@ -1781,7 +1820,7 @@ const DEFAULT_ROOMS = [
 "#..............................#",
 "################################",
 ]},
-{ x:7, y:1, name:"Das Schwimmbecken", color:1, guards:[2,15,8,15],
+{ x:7, y:1, name:"Swimming Pool", color:4, wallStyle:"checker", bg:"#2020e0", guards:[2,21,21,21],
   decos:[[14,1,7]], rows:[
 "################################",
 "...............................#",
@@ -1800,7 +1839,7 @@ const DEFAULT_ROOMS = [
 "...............................#",
 "################################",
 ]},
-{ x:4, y:3, name:"Der Maschinenraum", color:0, guards:[11,9,11],
+{ x:4, y:3, name:"Emergency Generator", color:8, wallStyle:"checker", guards:[11,9,11],
   decos:[[29,1,12]], rows:[
 "################################",
 "#..............................#",
@@ -1874,10 +1913,12 @@ function parseAsciiRoom(def){
   if (def.ropes) room.ropes = def.ropes.map(r => ({tx:r[0], ty:r[1], len:r[2]}));
   room.air = !!def.air;
   room.nightmare = !!def.nightmare;
+  if (def.bg) room.bg = def.bg;
+  if (def.wallStyle) room.wallStyle = def.wallStyle;
   return { room, start };
 }
 
-const DEFAULT_REV = 24;  // bei jeder Änderung am Standard-Level erhöhen
+const DEFAULT_REV = 25;  // bei jeder Änderung am Standard-Level erhöhen
 const BUILD = 27;        // bei JEDER Code-Änderung erhöhen (Anzeige im Titel)
 
 function buildDefaultWorld(){
@@ -2113,18 +2154,43 @@ function drawFineStair(ctx, px, py, ascLeft, u){
   ctx.fillRect(px + hi + (ascLeft ? u : 5*u), py + 3*u, 2*u, 5*u);
 }
 
-function drawTile(ctx, t, px, py, s, wallCol, frame, crumbleDecay){
+function drawTile(ctx, t, px, py, s, wallCol, frame, crumbleDecay, wallStyle){
   const u = s/16;
   switch(t){
     case T.WALL: {
-      ctx.fillStyle = wallCol[0];
-      ctx.fillRect(px, py, s, s);
-      ctx.fillStyle = wallCol[1];
-      ctx.fillRect(px, py + 7*u, s, u);
-      ctx.fillRect(px, py + 15*u, s, u);
-      ctx.fillRect(px + 7*u, py, u, 7*u);
-      ctx.fillRect(px + 3*u, py + 8*u, u, 7*u);
-      ctx.fillRect(px + 11*u, py + 8*u, u, 7*u);
+      if (wallStyle === 'checker'){
+        // Schachbrett: 4x4-Kacheln, abwechselnd wallCol[0]/[1]
+        for (let cy=0; cy<4; cy++) for (let cx=0; cx<4; cx++){
+          ctx.fillStyle = ((cx+cy)%2===0) ? wallCol[0] : wallCol[1];
+          ctx.fillRect(px + cx*4*u, py + cy*4*u, 4*u, 4*u);
+        }
+      } else if (wallStyle === 'stripe'){
+        // Vertikale Streifen, phasengleich über die ganze Wand (px-basiert)
+        for (let cx=0; cx<4; cx++){
+          const globalStripe = Math.floor(px/u/4) + cx;
+          ctx.fillStyle = (globalStripe % 2 === 0) ? wallCol[0] : wallCol[1];
+          ctx.fillRect(px + cx*4*u, py, 4*u, s);
+        }
+      } else if (wallStyle === 'bark'){
+        // Baumrinde: Grundfarbe mit vertikalen Maserlinien + Astauge
+        ctx.fillStyle = wallCol[0];
+        ctx.fillRect(px, py, s, s);
+        ctx.fillStyle = wallCol[1];
+        ctx.fillRect(px + 2*u, py, u, s);
+        ctx.fillRect(px + 8*u, py, u, s);
+        ctx.fillRect(px + 13*u, py, u, s);
+        const knot = (Math.floor(px/u) + Math.floor(py/u)*3) % 7;
+        if (knot === 0){ ctx.fillRect(px + 5*u, py + 6*u, 3*u, 3*u); }
+      } else {
+        ctx.fillStyle = wallCol[0];
+        ctx.fillRect(px, py, s, s);
+        ctx.fillStyle = wallCol[1];
+        ctx.fillRect(px, py + 7*u, s, u);
+        ctx.fillRect(px, py + 15*u, s, u);
+        ctx.fillRect(px + 7*u, py, u, 7*u);
+        ctx.fillRect(px + 3*u, py + 8*u, u, 7*u);
+        ctx.fillRect(px + 11*u, py + 8*u, u, 7*u);
+      }
       break;
     }
     case T.PLAT: {
@@ -3214,6 +3280,7 @@ function renderRoomTiles(room, isPlay){
   // Deko zuerst (Hintergrund), dann Kacheln darüber
   for (const d of (room.decos || [])) drawDeco(ctx, d, frameCount);
   const wallCol = WALLCOLS[room.color % WALLCOLS.length];
+  const wallStyle = room.wallStyle || 'brick';
   for (let y=0; y<ROWS; y++){
     for (let x=0; x<COLS; x++){
       const t = room.tiles[y*COLS+x];
@@ -3235,7 +3302,7 @@ function renderRoomTiles(room, isPlay){
         drawFineStair(ctx, x*TILE, y*TILE, ascLeft, 1);
         continue;
       }
-      drawTile(ctx, t, x*TILE, y*TILE, TILE, wallCol, frameCount, decay);
+      drawTile(ctx, t, x*TILE, y*TILE, TILE, wallCol, frameCount, decay, wallStyle);
     }
   }
   (room.ropes || []).forEach((r, i) => renderRope(r, i));
@@ -3509,12 +3576,14 @@ function renderWillyAt(x, y, facing){
 function render(){
   if (mode === "title"){ renderTitle(); return; }
 
-  ctx.fillStyle = "#000";
-  ctx.fillRect(0, 0, W, H + HUD);
-
   const room = (mode === "play")
     ? curRoomPlay()
     : world.rooms[roomKey(edit.x, edit.y)];
+
+  ctx.fillStyle = "#000";
+  ctx.fillRect(0, 0, W, H + HUD);
+  ctx.fillStyle = (room && room.bg) || "#000";
+  ctx.fillRect(0, 0, W, H);
 
   if (room) renderRoomTiles(room, mode === "play");
 
@@ -4080,6 +4149,8 @@ function worldToSource(){
     if (room.granny) put(room.granny.tx, room.granny.ty, 'O');
     if (world.start.rx===x && world.start.ry===y) put(world.start.tx, world.start.ty, 'S');
     let head = "{ x:" + x + ", y:" + y + ", name:" + JSON.stringify(room.name) + ", color:" + (room.color||0);
+    if (room.wallStyle) head += ", wallStyle:" + JSON.stringify(room.wallStyle);
+    if (room.bg) head += ", bg:" + JSON.stringify(room.bg);
     const guards = gsorted.filter(g=>g.axis!=='a').map(g=>g.sprite||0);
     head += ", guards:[" + guards.join(",") + "]";
     if (room.air) head += ", air:true";

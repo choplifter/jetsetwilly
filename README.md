@@ -41,26 +41,26 @@ Willy hat die Party des Jahrhunderts gefeiert – überall im Herrenhaus liegen 
 29 Räume, 69 Flaschen. Wie im Original startet Willy im **Badezimmer**:
 
 ```
-Über den Dächern — Auf dem Dach       — Der Dachboden     — Unterm Dach      — Der Albtraum-Raum — Der Wächterturm  — Die Baumkrone   — Quirkafleeg-Galerie*
-|                  |                    |                                                          |                  |
-Die Orangerie    — Der Treppenabsatz  — Das Badezimmer    — Das Schlafzimmer   Der Rittersaal      Die Bibliothek   — Der Baumstamm   — Das Schwimmbecken
-                   |                    |                                      |                   |                  |
-Ballsaal West    — Ballsaal Ost       — Die Eingangshalle — Die Küche        — Die Speisekammer  — Der Ostflügel      Die Baumwurzeln
-                                        |                   |                                      |
-Der Stollen      — Die Zentrale Höhle — Der Weinkeller    — Der Kühlraum     — Der Maschinenraum   Die Schatzkammer
+Über den Dächern — Auf dem Dach       — Der Dachboden     — Unterm Dach      — The Nightmare Room  — Watch Tower      — Tree Top                    — We Must Perform a Quirkafleeg
+|                  |                    |                                                            |                  |
+Die Orangerie    — Der Treppenabsatz  — Das Badezimmer    — Das Schlafzimmer   Der Rittersaal        Die Bibliothek   — Inside the MegaTrunk        — Swimming Pool
+                   |                    |                                      |                     |                  |
+Ballsaal West    — Ballsaal Ost       — Die Eingangshalle — Die Küche        — Die Speisekammer    — Der Ostflügel      At the Foot of the MegaTree
+                                        |                   |                                        |
+Der Stollen      — Die Zentrale Höhle — Der Weinkeller    — Der Kühlraum     — Emergency Generator   Die Schatzkammer
 ```
 
-\* Original-Vorbild: „We Must Perform a Quirkafleeg"
+Der östliche Anbau (Zeile 4-7, Spalten 5-8) ist wörtlich aus der Original-JSW-Karte (https://maps.speccy.cz/map.php?id=JetSetWilly) übernommen – Layout, Farben/Wandtexturen (Schachbrett, Streifen, Rinde, blauer Himmel statt Schwarz) und Originalnamen, im Rahmen dieses nicht-kommerziellen Fan-Projekts.
 
 Besonderheiten einzelner Räume:
 
 - **Das Schlafzimmer**: Oma + Bett – das Spielziel
 - **Die Schatzkammer**: Hebel-Rätsel – ein Ritter bewacht drei Flaschen hinter einem Gitter
 - **Der Stollen** / **Die Zentrale Höhle**: Mine mit Manic-Miner-Luftvorrat; per Portal mit **Ballsaal West** verbunden
-- **Der Albtraum-Raum**: `nightmare`-Flag – Willy erscheint dort als fliegendes Schwein
-- **Der Baumstamm**: zwei parallele Lianen als Schacht-Abkürzung zwischen Baumkrone und Baumwurzeln
-- Der neue Anbau im Osten (Albtraum-Raum, Wächterturm, die drei Baum-Räume, Schwimmbecken, Quirkafleeg-Galerie) ist über **Unterm Dach** und die **Bibliothek** erreichbar – im Stil der Originalkarte (Nightmare Room, Watch Tower, Tree Top/MegaTrunk, Swimming Pool)
-- **Der Maschinenraum** (Emergency Generator) hängt am **Kühlraum** im Keller
+- **The Nightmare Room**: `nightmare`-Flag – Willy erscheint dort als fliegendes Schwein
+- **Inside the MegaTrunk**: zwei parallele Lianen als Schacht-Abkürzung zwischen Tree Top und At the Foot of the MegaTree
+- Der neue Anbau (The Nightmare Room, Watch Tower, Tree Top/MegaTrunk, Swimming Pool, We Must Perform a Quirkafleeg) ist über **Unterm Dach** und die **Bibliothek** erreichbar
+- **Emergency Generator** hängt am **Kühlraum** im Keller
 
 ## Treppen & Rätsel
 
@@ -127,4 +127,4 @@ Mit dem Editor gebaute Welten lassen sich als **eingebautes Standard-Level** in 
 
 ## Hinweis zu den Originaldaten
 
-Sprites, Level und Musik sind eigene Nachempfindungen im Stil des Originals – es wurden keine Original-Spieldaten (Grafiken, Leveldaten, geschützte Melodien) übernommen.
+Sprites und Musik sind eigene Nachempfindungen im Stil des Originals – keine Original-Grafikdateien oder geschützte Melodien wurden übernommen. Der östliche Anbau des Herrenhauses (8 Räume, siehe oben) orientiert sich dagegen bewusst 1:1 am Layout, den Wandfarben und den englischen Originalnamen der Speccy-Version, gezeichnet mit der eigenen Engine (keine Original-Bilddateien). Dieses Projekt ist ein nicht-kommerzielles Fan-Hommage-Projekt ohne Gewinnabsicht.
