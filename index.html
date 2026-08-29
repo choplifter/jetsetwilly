@@ -120,6 +120,10 @@
   .swatch.sel{border-color:#fff;}
   #wallStyles{display:flex; gap:4px; flex-wrap:wrap;}
   #ropeStyles{display:flex; gap:4px;}
+  input#ropeLenInput{
+    background:#101018; border:2px solid var(--border); color:var(--ink);
+    font-family:inherit; font-size:12px; padding:3px 4px;
+  }
   #bgColors{display:flex; gap:4px;}
   .styleBtn{font-size:10px; padding:3px 6px; background:#101018; border:2px solid var(--border); color:var(--ink); cursor:pointer;}
   .styleBtn.sel{border-color:var(--accent); color:var(--accent); background:#20200a;}
@@ -227,6 +231,7 @@
     <div class="row"><span style="font-size:11px">Farbe:</span><div id="colors"></div></div>
     <div class="row"><span style="font-size:11px">Wandstil:</span><div id="wallStyles"></div></div>
     <div class="row"><span style="font-size:11px">Liane:</span><div id="ropeStyles"></div></div>
+    <div class="row"><span style="font-size:11px">Lianenlänge:</span><input type="number" id="ropeLenInput" min="2" max="20" value="12" style="width:48px" title="Länge (in Kacheln) für neu platzierte Lianen. Klick auf eine bestehende Liane setzt sie auf diesen Wert; Rechtsklick entfernt sie."></div>
     <div class="row"><button id="clearRoomBtn">Raum leeren</button><button id="delRoomBtn">Raum löschen</button><span id="roomCoord" style="font-size:11px;color:#8888aa"></span></div>
     <label class="row" style="font-size:11px;cursor:pointer"><input type="checkbox" id="airChk"> Luftvorrat (Manic-Miner-Raum)</label>
     <label class="row" style="font-size:11px;cursor:pointer"><input type="checkbox" id="nmChk"> Albtraum (Willy als fliegendes Schwein)</label>
@@ -1448,7 +1453,7 @@ const DEFAULT_ROOMS = [
 ".##############....#############",
 ]},
 { x:7, y:0, name:"We Must Perform a Quirkafleeg", color:9, wallStyle:"checker", bg:"#2020e0", guards:[12],
-  ropes:[[16,1,15]], rows:[
+  ropes:[[16,1,14]], rows:[
 "................................",
 "................................",
 "................................",
@@ -1929,7 +1934,7 @@ function parseAsciiRoom(def){
 }
 
 const DEFAULT_REV = 33;  // bei jeder Änderung am Standard-Level erhöhen
-const BUILD = 33;        // bei JEDER Code-Änderung erhöhen (Anzeige im Titel)
+const BUILD = 34;        // bei JEDER Code-Änderung erhöhen (Anzeige im Titel)
 
 function buildDefaultWorld(){
   const w = { start:{rx:2,ry:1,tx:5,ty:14}, rooms:{}, defaultRev:DEFAULT_REV, custom:false };
@@ -3761,7 +3766,7 @@ function render(){
 // ================================================================
 // EDITOR
 // ================================================================
-const edit = { x:1, y:1, tool:1, hover:null, guardSprite:0, decoType:0 };
+const edit = { x:1, y:1, tool:1, hover:null, guardSprite:0, decoType:0, ropeLen:12 };
 
 const TOOLS = [
   { id:"erase",  label:"Radierer", key:"KeyR" },
@@ -3896,8 +3901,9 @@ function applyTool(tx, ty, erase){
   } else if (tool.id === "rope"){
     room.ropes = room.ropes || [];
     const ex = room.ropes.findIndex(r => r.tx === tx && r.ty === ty);
-    if (ex >= 0) room.ropes.splice(ex, 1);
-    else room.ropes.push({tx, ty, len: Math.max(4, Math.min(9, 13 - ty))});
+    const len = Math.max(2, Math.min(20, edit.ropeLen || 12));
+    if (ex >= 0) room.ropes[ex].len = len;   // Klick auf bestehende Liane: Laenge auf aktuellen Wert setzen
+    else room.ropes.push({tx, ty, len});
   } else if (tool.id === "switch"){
     room.tiles[idx] = T.EMPTY;
     room.switches = room.switches || [];
@@ -4302,6 +4308,13 @@ roomNameInput.addEventListener("input", () => {
   const room = curEditRoom(true);
   room.name = roomNameInput.value || "Unbenannter Raum";
   refreshMapGrid(); scheduleSave();
+});
+
+const ropeLenInput = document.getElementById("ropeLenInput");
+ropeLenInput.value = edit.ropeLen;
+ropeLenInput.addEventListener("input", () => {
+  const n = parseInt(ropeLenInput.value, 10);
+  if (!isNaN(n)) edit.ropeLen = Math.max(2, Math.min(20, n));
 });
 
 document.getElementById("clearRoomBtn").addEventListener("click", () => {
