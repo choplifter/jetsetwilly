@@ -289,9 +289,9 @@ const AIR_MAX = 2100;           // Luftvorrat in Frames (Manic-Miner-Räume)
 const VANISH_TIME = 24;         // Schwundboden: Frames bis endgültig weg
 
 const T = { EMPTY:0, WALL:1, PLAT:2, SPIKE:3, CONVL:4, CONVR:5, CRUMBLE:6, SOLAR:7,
-            CONVML:8, CONVMR:9, VANISH:10, STAIR:11, GATE:12 };
+            CONVML:8, CONVMR:9, VANISH:10, STAIR:11, GATE:12, CHAIN:13 };
 const SOLID = t => t === T.WALL || t === T.CONVL || t === T.CONVR || t === T.CRUMBLE ||
-                   t === T.CONVML || t === T.CONVMR || t === T.VANISH || t === T.GATE;
+                   t === T.CONVML || t === T.CONVMR || t === T.VANISH || t === T.GATE || t === T.CHAIN;
 const BLOCKS_GUARD = t => SOLID(t) || t === T.PLAT || t === T.STAIR;
 
 const BRIGHT = ['#00ffff','#ff00ff','#ffff00','#00ff00','#ff5555','#ffffff'];
@@ -1788,19 +1788,19 @@ const DEFAULT_ROOMS = [
 "###############....#############",
 ]},
 { x:6, y:2, name:"At the Foot of the MegaTree", color:8, wallStyle:"checker", guards:[9,9,13],
-  ropes:[[1,0,11],[4,0,11],[7,0,9],[14,0,10]],
+  ropes:[[14,0,10]],
   decos:[[15,3,20],[16,3,20],[17,3,20],[11,4,20],[13,5,20],[14,5,20],[11,7,20],[16,7,20],[16,9,20],[17,9,20],[11,10,20],[12,10,20]], rows:[
-"###############....#############",
-"#.........#.......##############",
-"#.........#....................#",
-"#.........#....................#",
-"#.........#.......##############",
-"#.........#....................#",
-"#.........#....................#",
-"#.........#.......##############",
-"#.V..V....#....................#",
-"#......V..#....................#",
-"#.........#....................#",
+"#Y##Y##Y#######....#############",
+"#Y..Y..Y..#.......##############",
+"#Y..Y..Y..#....................#",
+"#Y..Y..Y..#....................#",
+"#Y..Y..Y..#.......##############",
+"#Y..Y..Y..#....................#",
+"#Y..Y..Y..#....................#",
+"#Y..Y..Y..#.......##############",
+"#YV.YV.Y..#....................#",
+"#Y..Y..V..#....................#",
+"#Y..Y.....#....................#",
 "#.........#....................#",
 "#.........#....................#",
 "#.........#....*...............#",
@@ -1897,6 +1897,7 @@ function parseAsciiRoom(def){
       else if (c==='~') t=T.VANISH;
       else if (c==='T') t=T.STAIR;
       else if (c==='G') t=T.GATE;
+      else if (c==='Y') t=T.CHAIN;
       else if (c==='!') room.switches.push({tx:x,ty:y});
       else if (c==='*') room.items.push({tx:x,ty:y});
       else if (c==='H') room.guardians.push({tx:x,ty:y,axis:'h',sprite:0});
@@ -1924,8 +1925,8 @@ function parseAsciiRoom(def){
   return { room, start };
 }
 
-const DEFAULT_REV = 28;  // bei jeder Änderung am Standard-Level erhöhen
-const BUILD = 30;        // bei JEDER Code-Änderung erhöhen (Anzeige im Titel)
+const DEFAULT_REV = 29;  // bei jeder Änderung am Standard-Level erhöhen
+const BUILD = 31;        // bei JEDER Code-Änderung erhöhen (Anzeige im Titel)
 
 function buildDefaultWorld(){
   const w = { start:{rx:2,ry:1,tx:5,ty:14}, rooms:{}, defaultRev:DEFAULT_REV, custom:false };
@@ -2319,6 +2320,23 @@ function drawTile(ctx, t, px, py, s, wallCol, frame, crumbleDecay, wallStyle){
       ctx.fillRect(px + 2*u, py, 2*u, s);
       ctx.fillRect(px + 7*u, py, 2*u, s);
       ctx.fillRect(px + 12*u, py, 2*u, s);
+      break;
+    }
+    case T.CHAIN: {
+      // Kettenwand: gelbe Diagonal-Kettenglieder auf schwarzem Grund (Original-JSW-Trennwand)
+      ctx.fillStyle = '#000000';
+      ctx.fillRect(px, py, s, s);
+      ctx.fillStyle = '#d8d800';
+      const seg = (x0,y0,x1,y1,x2,y2,x3,y3) => {
+        ctx.beginPath();
+        ctx.moveTo(px+x0*u, py+y0*u); ctx.lineTo(px+x1*u, py+y1*u);
+        ctx.lineTo(px+x2*u, py+y2*u); ctx.lineTo(px+x3*u, py+y3*u);
+        ctx.closePath(); ctx.fill();
+      };
+      seg(0,4, 8,0, 8,4, 0,8);
+      seg(8,4, 16,0, 16,4, 8,8);
+      seg(0,12, 8,8, 8,12, 0,16);
+      seg(8,12, 16,8, 16,12, 8,16);
       break;
     }
     case T.VANISH: {
@@ -3749,6 +3767,7 @@ const TOOLS = [
   { id:"vanish", label:"Schwund",  key:"KeyV", tile:T.VANISH },
   { id:"stair",  label:"Treppe",   key:"KeyT", tile:T.STAIR },
   { id:"gate",   label:"Gitter",   key:"KeyI", tile:T.GATE },
+  { id:"chain",  label:"Kette",    key:"KeyK", tile:T.CHAIN },
   { id:"switch", label:"Hebel",    key:"KeyU" },
   { id:"rope",   label:"Liane",    key:"KeyJ" },
   { id:"guardh", label:"Wächter↔", key:"Digit8" },
@@ -4176,7 +4195,7 @@ document.getElementById("loadWorldBtn").addEventListener("click", () => {
 });
 // Welt als DEFAULT_ROOMS-Quelltext exportieren (für index.html / apply-level.mjs)
 function worldToSource(){
-  const TILECH = {0:'.',1:'#',2:'=',3:'^',4:'<',5:'>',6:'%',7:'|',8:'(',9:')',10:'~',11:'T',12:'G'};
+  const TILECH = {0:'.',1:'#',2:'=',3:'^',4:'<',5:'>',6:'%',7:'|',8:'(',9:')',10:'~',11:'T',12:'G',13:'Y'};
   const parts = [];
   for (let y=0; y<MAPH; y++) for (let x=0; x<MAPW; x++){
     const room = world.rooms[roomKey(x,y)];
