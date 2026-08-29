@@ -1448,7 +1448,7 @@ const DEFAULT_ROOMS = [
 ".##############....#############",
 ]},
 { x:7, y:0, name:"We Must Perform a Quirkafleeg", color:9, wallStyle:"checker", bg:"#2020e0", guards:[12],
-  ropes:[[16,1,9]], rows:[
+  ropes:[[16,1,12]], rows:[
 "................................",
 "................................",
 "................................",
@@ -1735,7 +1735,7 @@ const DEFAULT_ROOMS = [
 "###....#########################",
 ]},
 { x:6, y:2, name:"At the Foot of the MegaTree", color:8, wallStyle:"checker", ropeStyle:"chain", guards:[9,9,13],
-  ropes:[[14,0,10]],
+  ropes:[[14,0,14]],
   decos:[[15,3,20],[16,3,20],[17,3,20],[11,4,20],[13,5,20],[14,5,20],[11,7,20],[16,7,20],[16,9,20],[17,9,20],[11,10,20],[12,10,20]], rows:[
 "#Y##Y##Y#######....#############",
 "#Y..Y..Y..#.......##############",
@@ -1928,7 +1928,7 @@ function parseAsciiRoom(def){
   return { room, start };
 }
 
-const DEFAULT_REV = 32;  // bei jeder Änderung am Standard-Level erhöhen
+const DEFAULT_REV = 33;  // bei jeder Änderung am Standard-Level erhöhen
 const BUILD = 33;        // bei JEDER Code-Änderung erhöhen (Anzeige im Titel)
 
 function buildDefaultWorld(){
