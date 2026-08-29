@@ -1809,7 +1809,7 @@ function makeEmptyRoom(name, color, bordered){
     for (let x=0;x<COLS;x++){ tiles[x] = T.WALL; tiles[(ROWS-1)*COLS+x] = T.WALL; }
     for (let y=0;y<ROWS;y++){ tiles[y*COLS] = T.WALL; tiles[y*COLS+COLS-1] = T.WALL; }
   }
-  return { name: name||"Unbenannter Raum", color: color||0, tiles, tileStyleMap:{}, items:[], guardians:[], granny:null, bed:null, decos:[], portal:null, air:false, ropes:[], switches:[] };
+  return { name: name||"Unbenannter Raum", color: color||0, tiles, tileStyleMap:{}, tileColorMap:{}, items:[], guardians:[], granny:null, bed:null, decos:[], portal:null, air:false, ropes:[], switches:[] };
 }
 
 function parseAsciiRoom(def){
@@ -1856,11 +1856,12 @@ function parseAsciiRoom(def){
   if (def.wallStyle) room.wallStyle = def.wallStyle;
   if (def.ropeStyle) room.ropeStyle = def.ropeStyle;
   if (def.wallStyles) for (const [tx,ty,st] of def.wallStyles) room.tileStyleMap[tx+","+ty] = st;
+  if (def.wallColors) for (const [tx,ty,cl] of def.wallColors) room.tileColorMap[tx+","+ty] = cl;
   return { room, start };
 }
 
 const DEFAULT_REV = 34;  // bei jeder Änderung am Standard-Level erhöhen
-const BUILD = 35;        // bei JEDER Code-Änderung erhöhen (Anzeige im Titel)
+const BUILD = 36;        // bei JEDER Code-Änderung erhöhen (Anzeige im Titel)
 
 function buildDefaultWorld(){
   const w = { start:{rx:2,ry:1,tx:5,ty:14}, rooms:{}, defaultRev:DEFAULT_REV, custom:false };
@@ -1886,6 +1887,7 @@ function normalizeWorld(w){
     r.ropes = r.ropes || [];
     r.switches = r.switches || [];
     r.tileStyleMap = r.tileStyleMap || {};
+    r.tileColorMap = r.tileColorMap || {};
     r.name = r.name || "Raum"; r.color = r.color || 0;
   }
   return w;
@@ -2123,6 +2125,21 @@ function drawTile(ctx, t, px, py, s, wallCol, frame, crumbleDecay, wallStyle){
         ctx.fillRect(px + 13*u, py, u, s);
         const knot = (Math.floor(px/u) + Math.floor(py/u)*3) % 7;
         if (knot === 0){ ctx.fillRect(px + 5*u, py + 6*u, 3*u, 3*u); }
+      } else if (wallStyle === 'leaf'){
+        // Belaubte Wand: gemustertes Blattwerk (dunkelgruener Grund, zwei helle Toene)
+        ctx.fillStyle = '#004800';
+        ctx.fillRect(px, py, s, s);
+        const seed = (Math.floor(px/u)*7 + Math.floor(py/u)*13) % 5;
+        ctx.fillStyle = '#00a800';
+        for (let i=0;i<6;i++){
+          const bx = ((i*5 + seed*3) % 13) + 1, by = ((i*7 + seed*2) % 11) + 1;
+          ctx.fillRect(px+bx*u, py+by*u, 3*u, 3*u);
+        }
+        ctx.fillStyle = '#00d800';
+        for (let i=0;i<4;i++){
+          const bx = ((i*6 + seed*5 + 2) % 14) + 1, by = ((i*4 + seed*3 + 1) % 12) + 1;
+          ctx.fillRect(px+bx*u, py+by*u, 2*u, 2*u);
+        }
       } else {
         ctx.fillStyle = wallCol[0];
         ctx.fillRect(px, py, s, s);
@@ -3256,9 +3273,10 @@ ctx.imageSmoothingEnabled = false;
 function renderRoomTiles(room, isPlay){
   // Deko zuerst (Hintergrund), dann Kacheln darüber
   for (const d of (room.decos || [])) drawDeco(ctx, d, frameCount);
-  const wallCol = WALLCOLS[room.color % WALLCOLS.length];
+  const roomWallCol = WALLCOLS[room.color % WALLCOLS.length];
   const roomWallStyle = room.wallStyle || 'brick';
   const styleMap = room.tileStyleMap;
+  const colorMap = room.tileColorMap;
   for (let y=0; y<ROWS; y++){
     for (let x=0; x<COLS; x++){
       const t = room.tiles[y*COLS+x];
@@ -3281,7 +3299,9 @@ function renderRoomTiles(room, isPlay){
         continue;
       }
       const tileStyle = (styleMap && styleMap[x+","+y]) || roomWallStyle;
-      drawTile(ctx, t, x*TILE, y*TILE, TILE, wallCol, frameCount, decay, tileStyle);
+      const tileColorIdx = colorMap && colorMap[x+","+y];
+      const tileWallCol = (tileColorIdx !== undefined) ? WALLCOLS[tileColorIdx % WALLCOLS.length] : roomWallCol;
+      drawTile(ctx, t, x*TILE, y*TILE, TILE, tileWallCol, frameCount, decay, tileStyle);
     }
   }
   (room.ropes || []).forEach((r, i) => renderRope(r, i, room.ropeStyle));
@@ -3695,7 +3715,7 @@ function render(){
 // ================================================================
 // EDITOR
 // ================================================================
-const edit = { x:1, y:1, tool:1, hover:null, guardSprite:0, decoType:0, ropeLen:12, wallStyle:"", clipboard:null };
+const edit = { x:1, y:1, tool:1, hover:null, guardSprite:0, decoType:0, ropeLen:12, wallStyle:"", color:0, clipboard:null };
 
 const TOOLS = [
   { id:"erase",  label:"Radierer", key:"KeyR" },
@@ -3803,6 +3823,7 @@ function applyTool(tx, ty, erase){
   if (erase || tool.id === "erase"){
     room.tiles[idx] = T.EMPTY;
     if (room.tileStyleMap) delete room.tileStyleMap[tx+","+ty];
+    if (room.tileColorMap) delete room.tileColorMap[tx+","+ty];
     removeEntities();
     removeDecoAt(tx, ty);
   } else if (tool.id === "deco"){
@@ -3814,11 +3835,14 @@ function applyTool(tx, ty, erase){
   } else if (tool.tile !== undefined){
     removeEntities();
     room.tiles[idx] = tool.tile;
-    // Wandstil wird nur beim Malen selbst uebernommen - bestehende Kacheln
-    // behalten ihr Aussehen, auch wenn der Wandstil-Regler spaeter wechselt
+    // Wandstil & Farbe werden nur beim Malen selbst uebernommen - bestehende
+    // Kacheln behalten ihr Aussehen, auch wenn die Regler spaeter wechseln
     room.tileStyleMap = room.tileStyleMap || {};
+    room.tileColorMap = room.tileColorMap || {};
     if (tool.tile === T.WALL && edit.wallStyle) room.tileStyleMap[tx+","+ty] = edit.wallStyle;
     else delete room.tileStyleMap[tx+","+ty];
+    if ((tool.tile === T.WALL || tool.tile === T.PLAT) && edit.color !== room.color) room.tileColorMap[tx+","+ty] = edit.color;
+    else delete room.tileColorMap[tx+","+ty];
   } else if (tool.id === "item"){
     room.tiles[idx] = T.EMPTY;
     if (!room.items.some(it => it.tx===tx && it.ty===ty)){
@@ -4003,13 +4027,14 @@ function buildColors(){
     el.className = "swatch";
     el.style.background = c[0];
     el.addEventListener("click", () => {
-      const room = curEditRoom(true);
-      room.color = i;
-      refreshRoomUI();
-      scheduleSave();
+      // Nur Pinsel-Einstellung fuer NEU gemalte Kacheln - bestehende Waende
+      // behalten ihre Farbe (siehe applyTool)
+      edit.color = i;
+      [...colorsDiv.children].forEach((c2,j)=>c2.classList.toggle("sel", j===i));
     });
     colorsDiv.appendChild(el);
   });
+  [...colorsDiv.children].forEach((c2,j)=>c2.classList.toggle("sel", j===edit.color));
 }
 
 const WALL_STYLES = [
@@ -4017,6 +4042,7 @@ const WALL_STYLES = [
   {id:"checker", label:"Schach"},
   {id:"stripe", label:"Streifen"},
   {id:"bark", label:"Rinde"},
+  {id:"leaf", label:"Blatt"},
 ];
 const wallStylesDiv = document.getElementById("wallStyles");
 function buildWallStyles(){
@@ -4093,8 +4119,7 @@ function refreshRoomUI(){
     (outdated ? " · Standard-Level veraltet – ↺ lädt V" + DEFAULT_REV : "");
   airChk.checked = !!(room && room.air);
   nmChk.checked = !!(room && room.nightmare);
-  [...colorsDiv.children].forEach((el,i)=>el.classList.toggle("sel", room && room.color===i));
-  // Wandstil ist ein globaler Pinsel (siehe buildWallStyles), nicht raumgebunden
+  // Farbe & Wandstil sind globale Pinsel (siehe buildColors/buildWallStyles), nicht raumgebunden
   [...ropeStylesDiv.children].forEach((el,i)=>el.classList.toggle("sel", room && (room.ropeStyle||"")===ROPE_STYLES[i].id));
   [...bgColorsDiv.children].forEach((el,i)=>el.classList.toggle("sel", room && (room.bg||null)===BG_COLORS[i].id));
 }
@@ -4219,6 +4244,8 @@ function worldToSource(){
     if ((room.decos||[]).length) head += ",\n  decos:[" + room.decos.map(d=>"["+d.tx+","+d.ty+","+d.type+"]").join(",") + "]";
     { const wsEntries = Object.entries(room.tileStyleMap||{}).filter(([k,v])=>v);
       if (wsEntries.length) head += ",\n  wallStyles:[" + wsEntries.map(([k,v])=>{ const [wx,wy]=k.split(","); return "["+wx+","+wy+","+JSON.stringify(v)+"]"; }).join(",") + "]"; }
+    { const wcEntries = Object.entries(room.tileColorMap||{}).filter(([k,v])=>v!==undefined && v!==null);
+      if (wcEntries.length) head += ",\n  wallColors:[" + wcEntries.map(([k,v])=>{ const [wx,wy]=k.split(","); return "["+wx+","+wy+","+v+"]"; }).join(",") + "]"; }
     head += ", rows:[";
     parts.push(head + "\n" + grid.map(r=>'"'+r.join('')+'",').join("\n") + "\n]},");
   }
@@ -4260,7 +4287,7 @@ document.getElementById("clearRoomBtn").addEventListener("click", () => {
   const room = curEditRoom(true);
   const fresh = makeEmptyRoom(room.name, room.color, true);
   room.tiles = fresh.tiles; room.items = []; room.guardians = [];
-  room.granny = null; room.bed = null; room.decos = []; room.tileStyleMap = {};
+  room.granny = null; room.bed = null; room.decos = []; room.tileStyleMap = {}; room.tileColorMap = {};
   scheduleSave();
 });
 document.getElementById("copyRoomBtn").addEventListener("click", () => {
