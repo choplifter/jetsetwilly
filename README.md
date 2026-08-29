@@ -38,19 +38,29 @@ Willy hat die Party des Jahrhunderts gefeiert – überall im Herrenhaus liegen 
 
 ## Das Herrenhaus (Standard-Level)
 
-19 Räume, 42 Flaschen. Wie im Original startet Willy im **Badezimmer**:
+29 Räume, 69 Flaschen. Wie im Original startet Willy im **Badezimmer**:
 
 ```
-             Auf dem Dach — Der Dachboden — Unterm Dach
-                  |              |
-             Treppenabsatz — Das Badezimmer — Das Schlafzimmer     Der Rittersaal   Die Bibliothek
-                  |              |            (Oma + Bett)              |                |
-Ballsaal West — Ballsaal Ost — Eingangshalle — Die Küche — Die Speisekammer — Der Ostflügel
-      ↑                          |              |                                       |
-      ↑ (Portal)            Der Weinkeller — Der Kühlraum                       Die Schatzkammer
-      ↑                          |                                              (Hebel-Rätsel)
-Der Stollen — Die Zentrale Höhle (Mine, Manic-Miner-Regeln)
+Über den Dächern — Auf dem Dach       — Der Dachboden     — Unterm Dach      — Der Albtraum-Raum — Der Wächterturm  — Die Baumkrone   — Quirkafleeg-Galerie*
+|                  |                    |                                                          |                  |
+Die Orangerie    — Der Treppenabsatz  — Das Badezimmer    — Das Schlafzimmer   Der Rittersaal      Die Bibliothek   — Der Baumstamm   — Das Schwimmbecken
+                   |                    |                                      |                   |                  |
+Ballsaal West    — Ballsaal Ost       — Die Eingangshalle — Die Küche        — Die Speisekammer  — Der Ostflügel      Die Baumwurzeln
+                                        |                   |                                      |
+Der Stollen      — Die Zentrale Höhle — Der Weinkeller    — Der Kühlraum     — Der Maschinenraum   Die Schatzkammer
 ```
+
+\* Original-Vorbild: „We Must Perform a Quirkafleeg"
+
+Besonderheiten einzelner Räume:
+
+- **Das Schlafzimmer**: Oma + Bett – das Spielziel
+- **Die Schatzkammer**: Hebel-Rätsel – ein Ritter bewacht drei Flaschen hinter einem Gitter
+- **Der Stollen** / **Die Zentrale Höhle**: Mine mit Manic-Miner-Luftvorrat; per Portal mit **Ballsaal West** verbunden
+- **Der Albtraum-Raum**: `nightmare`-Flag – Willy erscheint dort als fliegendes Schwein
+- **Der Baumstamm**: zwei parallele Lianen als Schacht-Abkürzung zwischen Baumkrone und Baumwurzeln
+- Der neue Anbau im Osten (Albtraum-Raum, Wächterturm, die drei Baum-Räume, Schwimmbecken, Quirkafleeg-Galerie) ist über **Unterm Dach** und die **Bibliothek** erreichbar – im Stil der Originalkarte (Nightmare Room, Watch Tower, Tree Top/MegaTrunk, Swimming Pool)
+- **Der Maschinenraum** (Emergency Generator) hängt am **Kühlraum** im Keller
 
 ## Treppen & Rätsel
 
@@ -113,7 +123,7 @@ Mit dem Editor gebaute Welten lassen sich als **eingebautes Standard-Level** in 
 
 - Automatisches Speichern im Browser (localStorage)
 - **Export/Import** als JSON-Datei
-- **Standard-Level** lädt das 13-Raum-Herrenhaus neu; unveränderte Level älterer Versionen werden beim Start automatisch ersetzt
+- **Standard-Level** lädt das 29-Raum-Herrenhaus neu; unveränderte Level älterer Versionen werden beim Start automatisch ersetzt
 
 ## Hinweis zu den Originaldaten
 
