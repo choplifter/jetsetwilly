@@ -229,10 +229,11 @@
     <h2>RAUM</h2>
     <div class="row"><input id="roomName" maxlength="28" title="Raumname"></div>
     <div class="row"><span style="font-size:11px">Farbe:</span><div id="colors"></div></div>
-    <div class="row"><span style="font-size:11px">Wandstil:</span><div id="wallStyles"></div></div>
+    <div class="row"><span style="font-size:11px" title="Gilt nur für neu gemalte Mauer-Kacheln, bestehende bleiben unverändert">Wandstil:</span><div id="wallStyles"></div></div>
     <div class="row"><span style="font-size:11px">Liane:</span><div id="ropeStyles"></div></div>
     <div class="row"><span style="font-size:11px">Lianenlänge:</span><input type="number" id="ropeLenInput" min="2" max="20" value="12" style="width:48px" title="Länge (in Kacheln) für neu platzierte Lianen. Klick auf eine bestehende Liane setzt sie auf diesen Wert; Rechtsklick entfernt sie."></div>
-    <div class="row"><button id="clearRoomBtn">Raum leeren</button><button id="delRoomBtn">Raum löschen</button><span id="roomCoord" style="font-size:11px;color:#8888aa"></span></div>
+    <div class="row"><button id="clearRoomBtn">Raum leeren</button><button id="delRoomBtn">Raum löschen</button></div>
+    <div class="row"><button id="copyRoomBtn" title="Aktuellen Raum in die Zwischenablage kopieren">⧉ Kopieren</button><button id="pasteRoomBtn" title="Kopierten Raum hier einfügen">📋 Einfügen</button><span id="roomCoord" style="font-size:11px;color:#8888aa"></span></div>
     <label class="row" style="font-size:11px;cursor:pointer"><input type="checkbox" id="airChk"> Luftvorrat (Manic-Miner-Raum)</label>
     <label class="row" style="font-size:11px;cursor:pointer"><input type="checkbox" id="nmChk"> Albtraum (Willy als fliegendes Schwein)</label>
     <div class="row"><span style="font-size:11px">Hintergrund:</span><div id="bgColors"></div></div>
@@ -1884,7 +1885,7 @@ function makeEmptyRoom(name, color, bordered){
     for (let x=0;x<COLS;x++){ tiles[x] = T.WALL; tiles[(ROWS-1)*COLS+x] = T.WALL; }
     for (let y=0;y<ROWS;y++){ tiles[y*COLS] = T.WALL; tiles[y*COLS+COLS-1] = T.WALL; }
   }
-  return { name: name||"Unbenannter Raum", color: color||0, tiles, items:[], guardians:[], granny:null, bed:null, decos:[], portal:null, air:false, ropes:[], switches:[] };
+  return { name: name||"Unbenannter Raum", color: color||0, tiles, tileStyleMap:{}, items:[], guardians:[], granny:null, bed:null, decos:[], portal:null, air:false, ropes:[], switches:[] };
 }
 
 function parseAsciiRoom(def){
@@ -1930,11 +1931,12 @@ function parseAsciiRoom(def){
   if (def.bg) room.bg = def.bg;
   if (def.wallStyle) room.wallStyle = def.wallStyle;
   if (def.ropeStyle) room.ropeStyle = def.ropeStyle;
+  if (def.wallStyles) for (const [tx,ty,st] of def.wallStyles) room.tileStyleMap[tx+","+ty] = st;
   return { room, start };
 }
 
 const DEFAULT_REV = 33;  // bei jeder Änderung am Standard-Level erhöhen
-const BUILD = 34;        // bei JEDER Code-Änderung erhöhen (Anzeige im Titel)
+const BUILD = 35;        // bei JEDER Code-Änderung erhöhen (Anzeige im Titel)
 
 function buildDefaultWorld(){
   const w = { start:{rx:2,ry:1,tx:5,ty:14}, rooms:{}, defaultRev:DEFAULT_REV, custom:false };
@@ -1959,6 +1961,7 @@ function normalizeWorld(w){
     r.nightmare = !!r.nightmare;
     r.ropes = r.ropes || [];
     r.switches = r.switches || [];
+    r.tileStyleMap = r.tileStyleMap || {};
     r.name = r.name || "Raum"; r.color = r.color || 0;
   }
   return w;
@@ -3330,7 +3333,8 @@ function renderRoomTiles(room, isPlay){
   // Deko zuerst (Hintergrund), dann Kacheln darüber
   for (const d of (room.decos || [])) drawDeco(ctx, d, frameCount);
   const wallCol = WALLCOLS[room.color % WALLCOLS.length];
-  const wallStyle = room.wallStyle || 'brick';
+  const roomWallStyle = room.wallStyle || 'brick';
+  const styleMap = room.tileStyleMap;
   for (let y=0; y<ROWS; y++){
     for (let x=0; x<COLS; x++){
       const t = room.tiles[y*COLS+x];
@@ -3352,7 +3356,8 @@ function renderRoomTiles(room, isPlay){
         drawFineStair(ctx, x*TILE, y*TILE, ascLeft, 1);
         continue;
       }
-      drawTile(ctx, t, x*TILE, y*TILE, TILE, wallCol, frameCount, decay, wallStyle);
+      const tileStyle = (styleMap && styleMap[x+","+y]) || roomWallStyle;
+      drawTile(ctx, t, x*TILE, y*TILE, TILE, wallCol, frameCount, decay, tileStyle);
     }
   }
   (room.ropes || []).forEach((r, i) => renderRope(r, i, room.ropeStyle));
@@ -3766,7 +3771,7 @@ function render(){
 // ================================================================
 // EDITOR
 // ================================================================
-const edit = { x:1, y:1, tool:1, hover:null, guardSprite:0, decoType:0, ropeLen:12 };
+const edit = { x:1, y:1, tool:1, hover:null, guardSprite:0, decoType:0, ropeLen:12, wallStyle:"", clipboard:null };
 
 const TOOLS = [
   { id:"erase",  label:"Radierer", key:"KeyR" },
@@ -3873,6 +3878,7 @@ function applyTool(tx, ty, erase){
 
   if (erase || tool.id === "erase"){
     room.tiles[idx] = T.EMPTY;
+    if (room.tileStyleMap) delete room.tileStyleMap[tx+","+ty];
     removeEntities();
     removeDecoAt(tx, ty);
   } else if (tool.id === "deco"){
@@ -3884,6 +3890,11 @@ function applyTool(tx, ty, erase){
   } else if (tool.tile !== undefined){
     removeEntities();
     room.tiles[idx] = tool.tile;
+    // Wandstil wird nur beim Malen selbst uebernommen - bestehende Kacheln
+    // behalten ihr Aussehen, auch wenn der Wandstil-Regler spaeter wechselt
+    room.tileStyleMap = room.tileStyleMap || {};
+    if (tool.tile === T.WALL && edit.wallStyle) room.tileStyleMap[tx+","+ty] = edit.wallStyle;
+    else delete room.tileStyleMap[tx+","+ty];
   } else if (tool.id === "item"){
     room.tiles[idx] = T.EMPTY;
     if (!room.items.some(it => it.tx===tx && it.ty===ty)){
@@ -4091,13 +4102,14 @@ function buildWallStyles(){
     el.type = "button";
     el.textContent = ws.label;
     el.addEventListener("click", () => {
-      const room = curEditRoom(true);
-      if (ws.id) room.wallStyle = ws.id; else delete room.wallStyle;
-      refreshRoomUI();
-      scheduleSave();
+      // Nur Pinsel-Einstellung fuer NEU gemalte Kacheln - bestehende Waende
+      // behalten ihren Stil (siehe applyTool)
+      edit.wallStyle = ws.id;
+      [...wallStylesDiv.children].forEach((c,j)=>c.classList.toggle("sel", WALL_STYLES[j].id === ws.id));
     });
     wallStylesDiv.appendChild(el);
   });
+  [...wallStylesDiv.children].forEach((c,j)=>c.classList.toggle("sel", WALL_STYLES[j].id === edit.wallStyle));
 }
 
 const ROPE_STYLES = [
@@ -4158,7 +4170,7 @@ function refreshRoomUI(){
   airChk.checked = !!(room && room.air);
   nmChk.checked = !!(room && room.nightmare);
   [...colorsDiv.children].forEach((el,i)=>el.classList.toggle("sel", room && room.color===i));
-  [...wallStylesDiv.children].forEach((el,i)=>el.classList.toggle("sel", room && (room.wallStyle||"")===WALL_STYLES[i].id));
+  // Wandstil ist ein globaler Pinsel (siehe buildWallStyles), nicht raumgebunden
   [...ropeStylesDiv.children].forEach((el,i)=>el.classList.toggle("sel", room && (room.ropeStyle||"")===ROPE_STYLES[i].id));
   [...bgColorsDiv.children].forEach((el,i)=>el.classList.toggle("sel", room && (room.bg||null)===BG_COLORS[i].id));
 }
@@ -4281,6 +4293,8 @@ function worldToSource(){
     if (room.nightmare) head += ", nightmare:true";
     if ((room.ropes||[]).length) head += ",\n  ropes:[" + room.ropes.map(r=>"["+r.tx+","+r.ty+","+r.len+"]").join(",") + "]";
     if ((room.decos||[]).length) head += ",\n  decos:[" + room.decos.map(d=>"["+d.tx+","+d.ty+","+d.type+"]").join(",") + "]";
+    { const wsEntries = Object.entries(room.tileStyleMap||{}).filter(([k,v])=>v);
+      if (wsEntries.length) head += ",\n  wallStyles:[" + wsEntries.map(([k,v])=>{ const [wx,wy]=k.split(","); return "["+wx+","+wy+","+JSON.stringify(v)+"]"; }).join(",") + "]"; }
     head += ", rows:[";
     parts.push(head + "\n" + grid.map(r=>'"'+r.join('')+'",').join("\n") + "\n]},");
   }
@@ -4322,8 +4336,20 @@ document.getElementById("clearRoomBtn").addEventListener("click", () => {
   const room = curEditRoom(true);
   const fresh = makeEmptyRoom(room.name, room.color, true);
   room.tiles = fresh.tiles; room.items = []; room.guardians = [];
-  room.granny = null; room.bed = null; room.decos = [];
+  room.granny = null; room.bed = null; room.decos = []; room.tileStyleMap = {};
   scheduleSave();
+});
+document.getElementById("copyRoomBtn").addEventListener("click", () => {
+  const room = world.rooms[roomKey(edit.x, edit.y)];
+  if (!room){ alert("Hier ist kein Raum zum Kopieren."); return; }
+  edit.clipboard = JSON.parse(JSON.stringify(room));
+});
+document.getElementById("pasteRoomBtn").addEventListener("click", () => {
+  if (!edit.clipboard){ alert("Erst einen Raum kopieren."); return; }
+  const k = roomKey(edit.x, edit.y);
+  if (world.rooms[k] && !confirm("Bestehenden Raum hier mit der Kopie überschreiben?")) return;
+  world.rooms[k] = JSON.parse(JSON.stringify(edit.clipboard));
+  refreshRoomUI(); refreshMapGrid(); scheduleSave();
 });
 document.getElementById("delRoomBtn").addEventListener("click", () => {
   const k = roomKey(edit.x, edit.y);
