@@ -115,9 +115,10 @@
     flex:1; background:#101018; border:2px solid var(--border); color:var(--ink);
     font-family:inherit; font-size:12px; padding:5px 4px; min-width:0;
   }
-  #colors{display:flex; gap:4px;}
+  #colors{display:flex; gap:4px; flex-wrap:wrap;}
   .swatch{width:22px; height:22px; border:2px solid var(--border); cursor:pointer;}
   .swatch.sel{border-color:#fff;}
+  #gcolors{display:flex; gap:4px; flex-wrap:wrap;}
   #wallStyles{display:flex; gap:4px; flex-wrap:wrap;}
   #ropeStyles{display:flex; gap:4px;}
   input#ropeLenInput{
@@ -221,6 +222,7 @@
 
     <h2>WÄCHTER-SPRITE</h2>
     <div id="gsprites"></div>
+    <div class="row"><span style="font-size:11px">Wächter-Farbe:</span><div id="gcolors"></div></div>
 
     <h2>DEKO-TYP</h2>
     <div id="dsprites"></div>
@@ -1650,7 +1652,7 @@ const DEFAULT_ROOMS = [
 "................................",
 "####################...#########",
 ]},
-{ x:4, y:2, name:"Die Speisekammer", color:5, guards:[15,5],
+{ x:4, y:2, name:"Die Speisekammer", color:5, guards:[2,5],
   decos:[[26,13,9],[2,13,9],[5,14,3]], rows:[
 "#####...########################",
 "#..............................#",
@@ -1661,7 +1663,7 @@ const DEFAULT_ROOMS = [
 "#..............................#",
 "#....====...........====.......#",
 "#..............................#",
-"#.........====......H..........#",
+"#.........====...H.............#",
 "#..............................#",
 "#....====.......====...........#",
 "#..............................#",
@@ -1783,22 +1785,23 @@ const DEFAULT_ROOMS = [
 "..........^^^^T................#",
 "################################",
 ]},
-{ x:4, y:3, name:"Emergency Generator", color:8, wallStyle:"checker", guards:[9,9,11,9,11,9,18],
-  decos:[[29,1,12]], rows:[
+{ x:4, y:3, name:"Emergency Generator", color:8, wallStyle:"checker", guards:[9,9,18,9,18,9],
+  decos:[[24,6,3]],
+  wallStyles:[[13,3,"checker"]], rows:[
 "##########....##################",
 "#..V............V..............#",
-"#........H.....................#",
-"#........................*.....#",
+"#.........H....................#",
+"#............#.................#",
 "#.......======.................#",
-".....H................H........#",
-"...............................#",
+".....H................H..*.....#",
+"..........................!....#",
 "...======...........=======....#",
 "#...................H..........#",
 "#..............................#",
 "#.======.........=======.......#",
-"#....H.........................#",
 "#..............................#",
-"#.==*====.......=======........#",
+"#..............................#",
+"#.==.====...P...=======........#",
 "#........................^^^^^.#",
 "################################",
 ]},
@@ -1873,6 +1876,10 @@ function parseAsciiRoom(def){
     let gi = 0;
     room.guardians.forEach(g => { if (g.axis !== 'a') g.sprite = def.guards[gi++] || 0; });
   }
+  if (def.guardColors){
+    let gi = 0;
+    room.guardians.forEach(g => { if (g.axis !== 'a'){ const c = def.guardColors[gi++]; g.color = (c===undefined || c===-1) ? null : c; } });
+  }
   if (def.decos) room.decos = def.decos.map(d => ({tx:d[0], ty:d[1], type:d[2]}));
   if (def.ropes) room.ropes = def.ropes.map(r => ({tx:r[0], ty:r[1], len:r[2]}));
   room.air = !!def.air;
@@ -1885,7 +1892,7 @@ function parseAsciiRoom(def){
   return { room, start };
 }
 
-const DEFAULT_REV = 40;  // bei jeder Änderung am Standard-Level erhöhen
+const DEFAULT_REV = 42;  // bei jeder Änderung am Standard-Level erhöhen
 const BUILD = 39;        // bei JEDER Code-Änderung erhöhen (Anzeige im Titel)
 
 function buildDefaultWorld(){
@@ -1902,7 +1909,7 @@ function normalizeWorld(w){
   for (const k in w.rooms){
     const r = w.rooms[k];
     r.items = r.items || [];
-    r.guardians = (r.guardians || []).map(g => ({tx:g.tx, ty:Math.min(g.ty, ROWS-2), axis:g.axis||'h', sprite:g.sprite||0}));
+    r.guardians = (r.guardians || []).map(g => ({tx:g.tx, ty:Math.min(g.ty, ROWS-2), axis:g.axis||'h', sprite:g.sprite||0, color: (typeof g.color === 'number') ? g.color : null}));
     r.granny = r.granny || null;
     r.bed = r.bed || null;
     r.decos = r.decos || [];
@@ -2754,7 +2761,7 @@ function initGuards(room){
       dir: (i%2===0?1:-1),
       speed: g.axis==='h' ? 1.0 : (g.axis==='f' ? 2.2 : (g.axis==='w' ? 0.9 : 1.2)),
       state: g.axis==='w' ? 'walk' : 'fall', timer: 0, vy: 0, fall: 0,
-      color: BRIGHT[(i + (g.axis==='v'?2:0)) % BRIGHT.length],
+      color: g.color!=null ? BRIGHT[g.color % BRIGHT.length] : BRIGHT[(i + (g.axis==='v'?2:0)) % BRIGHT.length],
     };
     if (g.axis === 'a'){
       // Pfeil: fliegt von außen quer durchs Bild, Richtung je nach Platzierungsseite
@@ -3152,6 +3159,10 @@ function physTick(){
       let blocked = nx < 0 || nx > W-GS;
       if (!blocked) for (let ty=ty0; ty<=ty1; ty++){
         if (BLOCKS_GUARD(tileAtPlay(curRoom, edge, ty))) { blocked = true; break; }
+      }
+      // Nicht von der Plattform in die Luft weiterlaufen: am Zielrand muss noch Boden sein.
+      if (!blocked && BLOCKS_GUARD(tileAtPlay(curRoom, Math.floor(g.x/TILE), ty1+1))){
+        if (!BLOCKS_GUARD(tileAtPlay(curRoom, edge, ty1+1))) blocked = true;
       }
       if (blocked) g.dir = -g.dir; else g.x = nx;
     } else if (g.axis === 'a'){
@@ -3737,7 +3748,7 @@ function render(){
 // ================================================================
 // EDITOR
 // ================================================================
-const edit = { x:1, y:1, tool:1, hover:null, guardSprite:0, decoType:0, ropeLen:12, wallStyle:"", color:0, clipboard:null };
+const edit = { x:1, y:1, tool:1, hover:null, guardSprite:0, guardColor:null, decoType:0, ropeLen:12, wallStyle:"", color:0, clipboard:null };
 
 const TOOLS = [
   { id:"erase",  label:"Radierer", key:"KeyR" },
@@ -3802,7 +3813,8 @@ function renderEditorOverlay(room){
   if (room.granny) drawGranny(ctx, room.granny.tx, room.granny.ty, frameCount);
   room.guardians.forEach((g,i)=>{
     const spr = GUARD_SPRITES[(g.sprite||0) % GUARD_SPRITES.length];
-    drawBitmap(ctx, spr.frames[0], g.tx*TILE, g.ty*TILE, 2, BRIGHT[(i + (g.axis==='v'?2:0)) % BRIGHT.length]);
+    const gcol = g.color!=null ? BRIGHT[g.color % BRIGHT.length] : BRIGHT[(i + (g.axis==='v'?2:0)) % BRIGHT.length];
+    drawBitmap(ctx, spr.frames[0], g.tx*TILE, g.ty*TILE, 2, gcol);
     ctx.fillStyle = "#ffffff";
     ctx.font = "9px Consolas, monospace";
     ctx.fillText(g.axis==='h' ? "↔" : (g.axis==='v' ? "↕" : (g.axis==='f' ? "↓" : (g.axis==='w' ? "⤓" : "→"))), g.tx*TILE+12, g.ty*TILE-9);
@@ -3882,7 +3894,7 @@ function applyTool(tx, ty, erase){
     const axis = tool.id === "guardh" ? 'h' : (tool.id === "guardv" ? 'v' :
                  (tool.id === "guardf" ? 'f' : (tool.id === "guardw" ? 'w' : 'a')));
     const sprite = tool.id === "arrow" ? ARROW_IDX : edit.guardSprite;
-    room.guardians.push({tx:gx, ty:gy, axis, sprite});
+    room.guardians.push({tx:gx, ty:gy, axis, sprite, color: edit.guardColor});
   } else if (tool.id === "portal"){
     room.portal = {tx:Math.min(tx, COLS-2), ty:Math.min(ty, ROWS-2)};
   } else if (tool.id === "rope"){
@@ -4023,6 +4035,30 @@ function buildGuardSprites(){
       [...gspritesDiv.children].forEach((c,j)=>c.classList.toggle("sel", j===i));
     });
     gspritesDiv.appendChild(el);
+  });
+}
+
+const gcolorsDiv = document.getElementById("gcolors");
+function buildGuardColors(){
+  const auto = document.createElement("div");
+  auto.className = "swatch" + (edit.guardColor==null ? " sel" : "");
+  auto.title = "Automatisch (jeder Wächter bekommt reihum eine andere Farbe)";
+  auto.style.background = "linear-gradient(135deg, #00ffff 25%, #ff00ff 25% 50%, #ffff00 50% 75%, #00ff00 75%)";
+  auto.addEventListener("click", () => {
+    edit.guardColor = null;
+    [...gcolorsDiv.children].forEach((c,j)=>c.classList.toggle("sel", j===0));
+  });
+  gcolorsDiv.appendChild(auto);
+  BRIGHT.forEach((c, i) => {
+    const el = document.createElement("div");
+    el.className = "swatch" + (edit.guardColor===i ? " sel" : "");
+    el.title = c;
+    el.style.background = c;
+    el.addEventListener("click", () => {
+      edit.guardColor = i;
+      [...gcolorsDiv.children].forEach((c2,j)=>c2.classList.toggle("sel", j===i+1));
+    });
+    gcolorsDiv.appendChild(el);
   });
 }
 
@@ -4266,6 +4302,8 @@ function worldToSource(){
     if (room.ropeStyle) head += ", ropeStyle:" + JSON.stringify(room.ropeStyle);
     const guards = gsorted.filter(g=>g.axis!=='a').map(g=>g.sprite||0);
     head += ", guards:[" + guards.join(",") + "]";
+    const gcolors = gsorted.filter(g=>g.axis!=='a').map(g=> g.color!=null ? g.color : -1);
+    if (gcolors.some(c=>c!==-1)) head += ", guardColors:[" + gcolors.join(",") + "]";
     if (room.air) head += ", air:true";
     if (room.nightmare) head += ", nightmare:true";
     if ((room.ropes||[]).length) head += ",\n  ropes:[" + room.ropes.map(r=>"["+r.tx+","+r.ty+","+r.len+"]").join(",") + "]";
@@ -4601,7 +4639,7 @@ if ('serviceWorker' in navigator && location.protocol === 'https:'){
 // ================================================================
 world = loadWorld();
 edit.x = world.start.rx; edit.y = world.start.ry;
-buildTools(); buildGuardSprites(); buildDecoSprites(); buildColors(); buildWallStyles(); buildRopeStyles(); buildBgColors(); buildMapGrid();
+buildTools(); buildGuardSprites(); buildGuardColors(); buildDecoSprites(); buildColors(); buildWallStyles(); buildRopeStyles(); buildBgColors(); buildMapGrid();
 refreshRoomUI(); refreshMapGrid(); refreshSaves();
 setMode("title");
 cv.focus();
