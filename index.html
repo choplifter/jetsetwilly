@@ -1652,10 +1652,11 @@ const DEFAULT_ROOMS = [
 "................................",
 "####################...#########",
 ]},
-{ x:4, y:2, name:"Die Speisekammer", color:5, guards:[2,5],
-  decos:[[26,13,9],[2,13,9],[5,14,3]], rows:[
+{ x:4, y:2, name:"Die Speisekammer", color:5, guards:[2,2,5],
+  decos:[[26,13,9],[2,13,9],[5,14,3]],
+  wallStyles:[[3,11,"leaf"]], rows:[
 "#####...########################",
-"#..............................#",
+"#.....W........................#",
 "#....*.................*.......#",
 "#....===.............====......#",
 "#..............................#",
@@ -1665,7 +1666,7 @@ const DEFAULT_ROOMS = [
 "#..............................#",
 "#.........====...H.............#",
 "#..............................#",
-"#....====.......====...........#",
+"#..=.====.......====...........#",
 "#..............................#",
 "..........====..H...............",
 "................................",
@@ -1892,7 +1893,7 @@ function parseAsciiRoom(def){
   return { room, start };
 }
 
-const DEFAULT_REV = 42;  // bei jeder Änderung am Standard-Level erhöhen
+const DEFAULT_REV = 43;  // bei jeder Änderung am Standard-Level erhöhen
 const BUILD = 39;        // bei JEDER Code-Änderung erhöhen (Anzeige im Titel)
 
 function buildDefaultWorld(){
